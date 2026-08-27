@@ -13,7 +13,7 @@ Production-grade **Machine Learning & Generative AI Systems Engineer** with **5+
 ## 🤖 Generative AI & Machine Learning Portfolio Projects
 
 ### 1. Customer Support Automation — Quantized LLM + Agentic Workflow
-**GitHub**: https://github.com/aashiq-parinda/Customer-Support-Automation-Quantized-LLM-Agentic-Workflow | **HuggingFace Demo**: https://huggingface.co/spaces/ashrafksalim/customer-support-quantized-llm-agent
+**GitHub**: [Customer-Support-Automation-Quantized-LLM-Agentic-Workflow](https://github.com/aashiq-parinda/Customer-Support-Automation-Quantized-LLM-Agentic-Workflow) | **HuggingFace Demo**: [Live Space](https://huggingface.co/spaces/ashrafksalim/customer-support-quantized-llm-agent) | **Colab**: [Interactive Notebook](https://colab.research.google.com/drive/1RIf9_bZAoqmB9rq6nNWciNmaSPZJSpOx?usp=sharing)
 
 * **Problem**: High inference costs and latency SLAs when deploying 7B+ LLMs for high-volume tier-1 customer support, coupled with adversarial prompt injection and billing/legal safety risks.
 * **4-Bit NF4 Quantization** (`bitsandbytes`): VRAM reduced from **14.54 GB → 5.09 GB (65% reduction)**, enabling low-cost T4/L4 GPU deployment.
@@ -28,7 +28,7 @@ Production-grade **Machine Learning & Generative AI Systems Engineer** with **5+
 ---
 
 ### 2. Contract Risk Review — LoRA Fine-Tuning & Multi-Agent Legal Reasoning
-**GitHub**: https://github.com/aashiq-parinda/LLM-Fine-Tuning-Agentic-Reasoning-for-Contract-Risk-Review
+**GitHub**: [LLM-Fine-Tuning-Agentic-Reasoning-for-Contract-Risk-Review](https://github.com/aashiq-parinda/LLM-Fine-Tuning-Agentic-Reasoning-for-Contract-Risk-Review)
 
 * **Problem**: Generic LLMs hallucinate and miss liability, indemnification, and governing law risks in enterprise legal contracts — high-stakes failures with direct financial consequences.
 * **LoRA / PEFT Fine-Tuning** on DeBERTa-v3 and Qwen2.5, trained on the LEDGAR legal corpus for deterministic clause risk classification.
@@ -41,7 +41,7 @@ Production-grade **Machine Learning & Generative AI Systems Engineer** with **5+
 ---
 
 ### 3. Quantum Hardware Validation & Benchmarking Suite
-**GitHub**: https://github.com/aashiq-parinda/Quantum-Hardware-Validation-Benchmarking-Suite
+**GitHub**: [Quantum-Hardware-Validation-Benchmarking-Suite](https://github.com/aashiq-parinda/Quantum-Hardware-Validation-Benchmarking-Suite)
 
 * **Problem**: No standardized empirical reporting framework for evaluating NISQ circuits and algorithmic fidelity across realistic hardware error models.
 * **Hardware-Agnostic Benchmarking Engine**: Profiles quantum circuit depth, gate counts, and decoherence times (T1, T2).
