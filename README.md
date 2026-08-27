@@ -26,16 +26,16 @@ Unlike typical bootcamp notebooks or basic UI wrappers, every repository in this
 
 | Repository / Project | Focus Area | Core Technologies | Key Empirical Receipts | Live Demos & Code |
 | :--- | :--- | :--- | :--- | :--- |
-| **[1. Customer Support Quantized LLM Agent](./portfolio/Customer-Support-Automation-Quantized-LLM-Agentic-Workflow)** | **LLM Optimization & Cost Engineering** | 4-bit NF4 Quantization, bitsandbytes, Hybrid Search (BM25 + Dense RRF), FastAPI SSE | ⚡ **96.67% Cost Reduction**<br>💾 **65% VRAM Reduction** (14.5GB → 5.1GB)<br>🛡️ **0.9412 Guardrail F1** | [![Space](https://img.shields.io/badge/Demo-HuggingFace%20Space-blue)](https://huggingface.co/spaces/ashrafksalim/customer-support-quantized-llm-agent) [![Colab](https://img.shields.io/badge/Colab-Interactive%20Notebook-orange)](https://colab.research.google.com/drive/1RIf9_bZAoqmB9rq6nNWciNmaSPZJSpOx?usp=sharing) |
-| **[2. Contract Risk Review & Reasoning](./portfolio/LLM-Fine-Tuning-Agentic-Reasoning-for-Contract-Risk-Review)** | **Domain Fine-Tuning & Legal AI** | LoRA / PEFT Adapters, DeBERTa-v3 / Qwen2.5, LEDGAR Dataset, ChromaDB RAG | 🎯 **High-precision Clause Risk Extraction**<br>🔍 **Precedent Case Grounding**<br>⚖️ **Fairness & Bias Audited** | [![Notebook](https://img.shields.io/badge/Code-LoRA%20Pipeline-green)](./portfolio/LLM-Fine-Tuning-Agentic-Reasoning-for-Contract-Risk-Review) |
-| **[3. Quantum Hardware Benchmarking Suite](./portfolio/Quantum-Hardware-Validation-Benchmarking-Suite)** | **Scientific Computing & Systems Eval** | Quantum Circuit Simulation, Hardware Noise Modeling, Error Mitigation | 🔬 **Hardware-Agnostic Validation**<br>📊 **Fidelity & Error Benchmarking**<br>📈 **Algorithmic Profiling** | [![Notebook](https://img.shields.io/badge/Code-Benchmarking%20Suite-purple)](./portfolio/Quantum-Hardware-Validation-Benchmarking-Suite) |
+| **[1. Customer Support Quantized LLM Agent](https://github.com/aashiq-parinda/Customer-Support-Automation-Quantized-LLM-Agentic-Workflow)** | **LLM Optimization & Cost Engineering** | 4-bit NF4 Quantization, bitsandbytes, Hybrid Search (BM25 + Dense RRF), FastAPI SSE | ⚡ **96.67% Cost Reduction**<br>💾 **65% VRAM Reduction** (14.5GB → 5.1GB)<br>🛡️ **0.9412 Guardrail F1** | [![GitHub](https://img.shields.io/badge/GitHub-Repo-black?logo=github)](https://github.com/aashiq-parinda/Customer-Support-Automation-Quantized-LLM-Agentic-Workflow) [![Space](https://img.shields.io/badge/Demo-HuggingFace%20Space-blue)](https://huggingface.co/spaces/ashrafksalim/customer-support-quantized-llm-agent) [![Colab](https://img.shields.io/badge/Colab-Notebook-orange)](https://colab.research.google.com/drive/1RIf9_bZAoqmB9rq6nNWciNmaSPZJSpOx?usp=sharing) |
+| **[2. Contract Risk Review & Reasoning](https://github.com/aashiq-parinda/LLM-Fine-Tuning-Agentic-Reasoning-for-Contract-Risk-Review)** | **Domain Fine-Tuning & Legal AI** | LoRA / PEFT Adapters, DeBERTa-v3 / Qwen2.5, LEDGAR Dataset, ChromaDB RAG | 🎯 **High-precision Clause Risk Extraction**<br>🔍 **Precedent Case Grounding**<br>⚖️ **Fairness & Bias Audited (1.000 F1)** | [![GitHub](https://img.shields.io/badge/GitHub-Repo-black?logo=github)](https://github.com/aashiq-parinda/LLM-Fine-Tuning-Agentic-Reasoning-for-Contract-Risk-Review) |
+| **[3. Quantum Hardware Benchmarking Suite](https://github.com/aashiq-parinda/Quantum-Hardware-Validation-Benchmarking-Suite)** | **Scientific Computing & Systems Eval** | Quantum Circuit Simulation, Hardware Noise Modeling, Error Mitigation | 🔬 **Hardware-Agnostic Validation**<br>📊 **Fidelity & Error Benchmarking**<br>📈 **Algorithmic Profiling** | [![GitHub](https://img.shields.io/badge/GitHub-Repo-black?logo=github)](https://github.com/aashiq-parinda/Quantum-Hardware-Validation-Benchmarking-Suite) |
 
 ---
 
 ## 🏛️ Deep Dive: Project Highlights
 
 ### 1. Customer Support Automation — Quantized LLM + Agentic Workflow
-* **Repository**: [`Customer-Support-Automation-Quantized-LLM-Agentic-Workflow`](./portfolio/Customer-Support-Automation-Quantized-LLM-Agentic-Workflow)
+* **Repository**: [`Customer-Support-Automation-Quantized-LLM-Agentic-Workflow`](https://github.com/aashiq-parinda/Customer-Support-Automation-Quantized-LLM-Agentic-Workflow)
 * **Problem**: High inference costs and latency SLAs when deploying 7B+ LLMs for high-volume tier-1 customer tickets, coupled with safety risks on billing disputes and prompt injection.
 * **Architecture & Solution**:
   - **4-Bit NormalFloat4 (NF4)** quantization reducing memory footprint from 14.54 GB to 5.09 GB, enabling deployment on low-cost T4/L4 GPUs.
@@ -62,7 +62,7 @@ Unlike typical bootcamp notebooks or basic UI wrappers, every repository in this
 ---
 
 ### 2. Contract Risk Review — LoRA Fine-Tuning & Multi-Agent Legal Reasoning
-* **Repository**: [`LLM-Fine-Tuning-Agentic-Reasoning-for-Contract-Risk-Review`](./portfolio/LLM-Fine-Tuning-Agentic-Reasoning-for-Contract-Risk-Review)
+* **Repository**: [`LLM-Fine-Tuning-Agentic-Reasoning-for-Contract-Risk-Review`](https://github.com/aashiq-parinda/LLM-Fine-Tuning-Agentic-Reasoning-for-Contract-Risk-Review)
 * **Problem**: Generic LLMs hallucinate and miss non-standard liability, indemnification, and governing law risks in enterprise legal contracts.
 * **Architecture & Solution**:
   - **Hybrid Encoder-Decoder Architecture**: Uses parameter-efficient fine-tuning (LoRA on DeBERTa-v3/Qwen) for deterministic clause classification trained on the LEDGAR corpus.
@@ -72,7 +72,7 @@ Unlike typical bootcamp notebooks or basic UI wrappers, every repository in this
 ---
 
 ### 3. Quantum Hardware Validation & Benchmarking Suite
-* **Repository**: [`Quantum-Hardware-Validation-Benchmarking-Suite`](./portfolio/Quantum-Hardware-Validation-Benchmarking-Suite)
+* **Repository**: [`Quantum-Hardware-Validation-Benchmarking-Suite`](https://github.com/aashiq-parinda/Quantum-Hardware-Validation-Benchmarking-Suite)
 * **Problem**: Evaluating noisy intermediate-scale quantum (NISQ) circuits and algorithmic fidelity under realistic hardware error models.
 * **Architecture & Solution**:
   - **Hardware-Agnostic Benchmarking Engine**: Profiles quantum circuit depth, gate counts, and decoherence times ($T_1, T_2$).
@@ -103,12 +103,12 @@ repository-name/
 
 ## ⚡ Global Setup & Running Tests
 
-To run tests across any repository:
+To clone and run any repository:
 
 ```bash
-# Clone the portfolio
-git clone https://github.com/ashrafksalim/customer-support-quantized-llm-agent.git
-cd customer-support-quantized-llm-agent
+# Clone the repository of your choice
+git clone https://github.com/aashiq-parinda/Customer-Support-Automation-Quantized-LLM-Agentic-Workflow.git
+cd Customer-Support-Automation-Quantized-LLM-Agentic-Workflow
 
 # Install dependencies
 pip install -r requirements.txt
@@ -127,7 +127,7 @@ python -m src.eval.benchmark --iterations 5 --output results/
 **Khan Ashraf Salim**  
 *Machine Learning & Generative AI Systems Engineer*  
 - **Email**: [ashrafk.salim1@gmail.com](mailto:ashrafk.salim1@gmail.com)  
-- **GitHub**: [@ashrafksalim](https://github.com/ashrafksalim)  
+- **GitHub**: [@aashiq-parinda](https://github.com/aashiq-parinda)  
 - **Hugging Face**: [@ashrafksalim](https://huggingface.co/ashrafksalim)  
 
 ---
