@@ -12,7 +12,7 @@
 | Interview Role | ⚡ 1-Sentence Secret to Pass | 🎯 Key Formula / Concept |
 | :--- | :--- | :--- |
 | 🤖 **GenAI App Engineer** | Don't just suggest `LangChain`. Build concurrent hybrid RAG (BM25 + Dense RRF) and stream tokens via SSE to keep TTFT < 200ms. | $$RRF = \sum \frac{1}{60 + \text{rank}}$$ |
-| 🔬 **Applied AI Scientist** | Derive LoRA ($W_0 + \frac{\alpha}{r}BA$) and DPO implicit loss from scratch; explain why DPO drops the PPO reward model & critic. | $$\mathcal{L}_{\text{DPO}} = -\log \sigma \left(\beta \log \frac{\pi_\theta}{\pi_{\text{ref}}}\right)$$ |
+| 🔬 **Applied AI Scientist** | Derive LoRA ($W_0 + \frac{\alpha}{r}BA$) and DPO implicit loss from scratch; explain why DPO drops the PPO reward model & critic. | $$\mathcal{L}\_{\text{DPO}} = -\log \sigma \left(\beta \log \frac{\pi\_{\theta}}{\pi\_{\text{ref}}}\right)$$ |
 | ⚡ **GenAI Infra / MLOps** | Explain how PagedAttention cuts KV cache waste from 60% → 4% and why FP8 Tensor Cores give 2x GEMM speed over FP16 on H100s. | $$\text{VRAM} = \frac{P \times b}{\text{Quant}} + \text{KV Cache}$$ |
 | 🏛️ **Lead / Staff Architect** | Design multi-tier model cascades: route 60% queries to local 2B SLMs ($0.00005/req) to keep total cost < $0.001/query. | $$\text{Cost} = \sum c(m_i) P(m_i)$$ |
 
