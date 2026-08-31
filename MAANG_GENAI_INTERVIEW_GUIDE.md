@@ -1,7 +1,7 @@
 # 🚀 The Ultimate MAANG Generative AI & LLM Engineering Interview Bible
 
 > 🎯 **Target Roles**: GenAI Application Engineer | Applied AI Scientist | GenAI Infrastructure & MLOps Engineer | Lead / Principal AI Architect  
-> 🏷️ **Seniority Levels**: 🥉 Mid-Level (L4/E4) | 🥈 Senior (L5/E5) | 🥇 Staff / Principal (L6+/E6+)  
+> 🏷️ **Seniority Levels**: 🌱 Junior / Entry-Level (L3/E3) | 🥉 Mid-Level (L4/E4) | 🥈 Senior (L5/E5) | 🥇 Staff / Principal (L6+/E6+)  
 > 🏢 **Target Companies**: Meta | Google (DeepMind/GCP) | Amazon (AWS/Bedrock) | Apple | Netflix | OpenAI  
 > 📌 **Repository**: [Cracking The GenAI Portfolio](README.md) | [GenAI Glossary Cheat Sheet](GENAI_GLOSSARY_CHEATSHEET.md)  
 
@@ -11,7 +11,8 @@
 
 | Interview Role | ⚡ 1-Sentence Secret to Pass | 🎯 Key Formula / Concept |
 | :--- | :--- | :--- |
-| 🌱 **AI/ML Fundamentals** | Explain Byte-Pair Encoding (BPE) vocabulary merging and how Softmax temperature $T$ flattens/sharpens logit probabilities. | $$P(y_i) = \frac{\exp(z_i / T)}{\sum_j \exp(z_j / T)}$$ |
+| 🌱 **Junior / Entry-Level (L3)** | Build basic RAG with pure NumPy cosine similarity and `tiktoken` token truncation without relying on black-box frameworks. | $$\text{Sim}(A, B) = \frac{A \cdot B}{\|A\| \|B\|}$$ |
+| 🧠 **AI/ML Fundamentals** | Explain Byte-Pair Encoding (BPE) vocabulary merging and how Softmax temperature $T$ flattens/sharpens logit probabilities. | $$P(y_i) = \frac{\exp(z_i / T)}{\sum_j \exp(z_j / T)}$$ |
 | 🤖 **GenAI App Engineer** | Don't just suggest `LangChain`. Build concurrent hybrid RAG (BM25 + Dense RRF) and stream tokens via SSE to keep TTFT < 200ms. | $$RRF = \sum \frac{1}{60 + \text{rank}}$$ |
 | 🔬 **Applied AI Scientist** | Derive LoRA ($W_0 + \frac{\alpha}{r}BA$) and DPO implicit loss from scratch; explain why DPO drops the PPO reward model & critic. | $$\mathcal{L}\_{\text{DPO}} = -\log \sigma \left(\beta \log \frac{\pi\_{\theta}}{\pi\_{\text{ref}}}\right)$$ |
 | ⚡ **GenAI Infra / MLOps** | Explain how PagedAttention cuts KV cache waste from 60% → 4% and why FP8 Tensor Cores give 2x GEMM speed over FP16 on H100s. | $$\text{VRAM} = \frac{P \times b}{\text{Quant}} + \text{KV Cache}$$ |
@@ -24,28 +25,31 @@
 - [🎯 Master Strategy: How to Crack 100% of MAANG GenAI Interviews](#-master-strategy-how-to-crack-100-of-maang-genai-interviews)
   - [1️⃣ The 6-Step MAANG GenAI System Design Blueprint](#1️⃣-the-6-step-maang-genai-system-design-blueprint)
   - [2️⃣ Mathematical Quick Reference & VRAM Cheat Sheet](#2️⃣-mathematical-quick-reference--vram-cheat-sheet)
-- [📂 Role 0: Core AI & Machine Learning Fundamentals Round](#-role-0-core-ai--machine-learning-fundamentals-round)
+- [📂 Role 0: Junior & Entry-Level GenAI Engineer Round (L3 / E3 / New Grad)](#-role-0-junior--entry-level-genai-engineer-round-l3--e3--new-grad)
+  - [🌱 Junior (L3/E3): Pure Python/NumPy RAG & Cosine Similarity Search from Scratch (Meta / Google)](#-junior-l3e3-pure-pythonnumpy-rag--cosine-similarity-search-from-scratch-meta--google)
+  - [🌱 Junior (L3/E3): Token Counter, Prompt Truncation & API Cost Estimator (Amazon / Apple)](#-junior-l3e3-token-counter-prompt-truncation--api-cost-estimator-amazon--apple)
+- [📂 Role 1: Core AI & Machine Learning Fundamentals Round](#-role-1-core-ai--machine-learning-fundamentals-round)
   - [🥉 Mid (L4/E4): Tokenization Mechanics, Temperature Sampling & Softmax Logits (Google / Meta)](#-mid-l4e4-tokenization-mechanics-temperature-sampling--softmax-logits-google--meta)
-- [📂 Role 1: GenAI / LLM Application Engineer (Full-Stack & Applied AI)](#-role-1-genai--llm-application-engineer-full-stack--applied-ai)
+- [📂 Role 2: GenAI / LLM Application Engineer (Full-Stack & Applied AI)](#-role-2-genai--llm-application-engineer-full-stack--applied-ai)
   - [🥉 Mid (L4/E4): Designing Low-TTFT Technical Doc RAG (Google)](#-mid-l4e4-designing-low-ttft-technical-doc-rag-google)
   - [🥉 Mid (L4/E4): Multi-Tier Guardrailing & Hallucination Defense (Amazon)](#-mid-l4e4-multi-tier-guardrailing--hallucination-defense-amazon)
   - [🥈 Senior (L5/E5): Multi-Agent Software Development & Tool Calling DAGs (Meta)](#-senior-l5e5-multi-agent-software-development--tool-calling-dags-meta)
   - [🥈 Senior (L5/E5): Hybrid Recommendation & LLM Semantic Reranking (Netflix)](#-senior-l5e5-hybrid-recommendation--llm-semantic-reranking-netflix)
   - [🥇 Staff / Principal (L6+): Global 100M QPS Multi-Tenant Knowledge Engine (Apple / Meta)](#-staff--principal-l6-global-100m-qps-multi-tenant-knowledge-engine-apple--meta)
-- [📂 Role 2: GenAI Research & Fine-Tuning Engineer / Applied Scientist](#-role-2-genai-research--fine-tuning-engineer--applied-scientist)
+- [📂 Role 3: GenAI Research & Fine-Tuning Engineer / Applied Scientist](#-role-3-genai-research--fine-tuning-engineer--applied-scientist)
   - [🥉 Mid (L4/E4): LoRA vs. QLoRA vs. Full Fine-Tuning Math (Meta)](#-mid-l4e4-lora-vs-qlora-vs-full-fine-tuning-math-meta)
   - [🥉 Mid (L4/E4): Direct Preference Optimization (DPO) vs. PPO Derivation (Google DeepMind)](#-mid-l4e4-direct-preference-optimization-dpo-vs-ppo-derivation-google-deepmind)
   - [🥈 Senior (L5/E5): Fine-Tuning a 32B Domain LLM with Synthetic Data (Amazon)](#-senior-l5e5-fine-tuning-a-32b-domain-llm-with-synthetic-data-amazon)
   - [🥇 Staff / Principal (L6+): Post-Training at Scale: GRPO, PRM & Reasoning Scaling Laws (OpenAI / Google)](#-staff--principal-l6-post-training-at-scale-grpo-prm--reasoning-scaling-laws-openai--google)
-- [📂 Role 3: GenAI Infrastructure, ML Platform & MLOps Engineer](#-role-3-genai-infrastructure-ml-platform--mlops-engineer)
+- [📂 Role 4: GenAI Infrastructure, ML Platform & MLOps Engineer](#-role-4-genai-infrastructure-ml-platform--mlops-engineer)
   - [🥉 Mid (L4/E4): Continuous Batching & PagedAttention KV Cache Mechanics (Meta)](#-mid-l4e4-continuous-batching--pagedattention-kv-cache-mechanics-meta)
   - [🥉 Mid (L4/E4): Quantization Mathematics: AWQ vs. GPTQ vs. FP8 vs. NF4 (AWS Bedrock)](#-mid-l4e4-quantization-mathematics-awq-vs-gptq-vs-fp8-vs-nf4-aws-bedrock)
   - [🥈 Senior (L5/E5): Speculative Decoding & Medusa Multi-Head Drafters (Netflix / Google)](#-senior-l5e5-speculative-decoding--medusa-multi-head-drafters-netflix--google)
   - [🥇 Staff / Principal (L6+): Distributed 3D Parallelism & NVLink Multi-Node Cluster Scaling (GCP / AWS)](#-staff--principal-l6-distributed-3d-parallelism--nvlink-multi-node-cluster-scaling-gcp--aws)
-- [📂 Role 4: Lead / Principal / Staff GenAI Architect](#-role-4-lead--principal--staff-genai-architect)
+- [📂 Role 5: Lead / Principal / Staff GenAI Architect](#-role-5-lead--principal--staff-genai-architect)
   - [🥇 Staff (L6): Automated Enterprise Vulnerability & Security Patch Agent (Meta / Apple)](#-staff-l6-automated-enterprise-vulnerability--security-patch-agent-meta--apple)
   - [🏆 Principal (L7): Enterprise Model Gateway, Dynamic Cascading Router & Cache (Netflix / Google)](#-principal-l7-enterprise-model-gateway-dynamic-cascading-router--cache-netflix--google)
-- [📂 Role 5: AI Safety, Security, Guardrails & Enterprise Compliance](#-role-5-ai-safety-security-guardrails--enterprise-compliance)
+- [📂 Role 6: AI Safety, Security, Guardrails & Enterprise Compliance](#-role-6-ai-safety-security-guardrails--enterprise-compliance)
   - [🥇 Staff / Principal (L6+): Preventing Indirect Prompt Injection, Vector RBAC & SOC2/HIPAA Compliance (AWS / GCP)](#-staff--principal-l6-preventing-indirect-prompt-injection-vector-rbac--soc2hipaa-compliance-aws--gcp)
 - [📊 Final Pre-Interview Mastery Checklist](#-final-pre-interview-mastery-checklist)
 
@@ -114,7 +118,153 @@ $$\text{Memory}_{\text{training}} \approx 16 \times P \text{ bytes}$$
 
 ---
 
-## 📂 Role 0: Core AI & Machine Learning Fundamentals Round
+## 📂 Role 0: Junior & Entry-Level GenAI Engineer Round (L3 / E3 / New Grad)
+
+---
+
+### 🌱 Junior (L3/E3): Pure Python/NumPy RAG & Cosine Similarity Search from Scratch (Meta / Google)
+
+> 🏢 **Company**: Meta / Google  
+> 🧠 **Concepts**: Vector Embeddings, Cosine Similarity Math, Matrix Multiplication, Top-K Ranking without Frameworks.
+
+> [!NOTE]
+> ⚡ **10-Second TL;DR**:  
+> Junior candidates fail when they can't code RAG without `LangChain`! Demonstrate core fundamentals by normalizing embedding vectors with `np.linalg.norm` and using `np.dot` matrix multiplication to rank top-$k$ context chunks in pure Python.
+
+#### 🎯 Question Statement
+"Write a complete Python class from scratch (using only `numpy`) that takes a set of text documents, computes cosine similarity against a user query embedding vector, ranks the top 3 document chunks, and constructs a grounded LLM prompt."
+
+#### 📐 Cosine Similarity Formula
+$$\text{Similarity}(A, B) = \frac{A \cdot B}{\|A\| \|B\|}$$
+
+#### 💻 Pure Python & NumPy Vector Search Code
+
+```python
+import numpy as np
+
+class PureNumPyVectorSearch:
+    def __init__(self, documents: list[str], embeddings: np.ndarray):
+        self.documents = documents  # List of N document strings
+        # Normalize document embeddings up front to speed up Cosine Similarity
+        norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+        self.normalized_embeddings = embeddings / np.maximum(norms, 1e-9)
+
+    def retrieve_top_k(self, query_embedding: np.ndarray, top_k: int = 3) -> list[tuple[str, float]]:
+        # Normalize query vector
+        query_norm = query_embedding / np.maximum(np.linalg.norm(query_embedding), 1e-9)
+        
+        # Fast GPU/CPU Matrix-Vector Dot Product (equivalent to Cosine Similarity)
+        cosine_scores = np.dot(self.normalized_embeddings, query_norm)
+        
+        # Get top-k document indices sorted descending
+        top_k_indices = np.argsort(cosine_scores)[::-1][:top_k]
+        
+        results = [(self.documents[idx], float(cosine_scores[idx])) for idx in top_k_indices]
+        return results
+
+    def build_rag_prompt(self, query: str, top_chunks: list[tuple[str, float]]) -> str:
+        context_str = "\n".join([f"- {doc}" for doc, score in top_chunks])
+        prompt = (
+            f"Context Information:\n{context_str}\n\n"
+            f"User Question: {query}\n\n"
+            "Instruction: Answer the question strictly using the provided Context. If unknown, reply 'I do not know'."
+        )
+        return prompt
+
+# Quick Test Verification
+docs = [
+    "Llama 3 is a 70B parameter open-weights model developed by Meta.",
+    "PyTorch 2.0 introduces torch.compile for graph acceleration.",
+    "vLLM uses PagedAttention to optimize KV cache memory fragmentation."
+]
+# Dummy 4D embedding vectors for demonstration
+doc_vectors = np.array([
+    [0.1, 0.8, 0.1, 0.0],
+    [0.0, 0.1, 0.9, 0.2],
+    [0.8, 0.1, 0.2, 0.5]
+])
+
+search_engine = PureNumPyVectorSearch(docs, doc_vectors)
+query_vec = np.array([0.7, 0.2, 0.1, 0.6])  # Query related to vLLM/Inference
+matches = search_engine.retrieve_top_k(query_vec, top_k=2)
+print("Top Matches:", matches)
+print("\nGrounded Prompt:\n", search_engine.build_rag_prompt("What is vLLM?", matches))
+```
+
+> [!TIP]
+> 🚀 **Junior Candidate Edge**:  
+> Tell the interviewer: *"Pre-normalizing document vectors during index ingestion converts expensive Cosine Similarity calculations into a single matrix-vector dot product (`np.dot`), reducing computation from $O(N \cdot D)$ divisions to ultra-fast hardware GEMM!"*
+
+---
+
+### 🌱 Junior (L3/E3): Token Counter, Prompt Truncation & API Cost Estimator (Amazon / Apple)
+
+> 🏢 **Company**: Amazon / Apple  
+> 🧠 **Concepts**: BPE Tokenization via `tiktoken`, Context Length Budgeting, Sliding Window Truncation, Cost Calculation.
+
+> [!NOTE]
+> ⚡ **10-Second TL;DR**:  
+> LLM APIs crash with HTTP 400 when input prompts exceed the model's context window. Write a utility using `tiktoken` to count tokens, truncate older conversation turns, and calculate input vs. output financial costs.
+
+#### 💻 Python Token Budgeting & Cost Estimator Code
+
+```python
+import tiktoken
+
+class LLMTokenBudgetManager:
+    def __init__(self, model_name: str = "gpt-4o", max_context_tokens: int = 4096):
+        self.model_name = model_name
+        self.max_context_tokens = max_context_tokens
+        # Load BPE encoder for model
+        try:
+            self.encoder = tiktoken.encoding_for_model(model_name)
+        except KeyError:
+            self.encoder = tiktoken.get_encoding("cl100k_base")
+
+    def count_tokens(self, text: str) -> int:
+        return len(self.encoder.encode(text))
+
+    def truncate_conversation_history(self, messages: list[dict], token_limit: int) -> list[dict]:
+        """Truncates oldest conversation messages to stay strictly within token_limit."""
+        current_tokens = 0
+        truncated_history = []
+        
+        # Iterate backwards from newest to oldest message
+        for msg in reversed(messages):
+            msg_tokens = self.count_tokens(msg["content"]) + 4  # 4 overhead tokens per message payload
+            if current_tokens + msg_tokens > token_limit:
+                break
+            truncated_history.append(msg)
+            current_tokens += msg_tokens
+            
+        # Restore chronological order
+        return list(reversed(truncated_history))
+
+    def calculate_cost(self, prompt_tokens: int, completion_tokens: int) -> float:
+        # Rates per 1,000 tokens (e.g. GPT-4o pricing)
+        input_rate_per_1k = 0.0025
+        output_rate_per_1k = 0.0100
+        
+        cost = (prompt_tokens / 1000.0 * input_rate_per_1k) + (completion_tokens / 1000.0 * output_rate_per_1k)
+        return round(cost, 6)
+
+# Test Verification
+manager = LLMTokenBudgetManager(max_context_tokens=100)
+sample_chat = [
+    {"role": "system", "content": "You are a helpful customer support agent."},
+    {"role": "user", "content": "Hi, I need help with my billing statement from last month."},
+    {"role": "assistant", "content": "Sure! I can help check your billing statement. What is your account ID?"},
+    {"role": "user", "content": "My account ID is ACC-99214. I was double-charged $49.99 on Tuesday."}
+]
+
+truncated_chat = manager.truncate_conversation_history(sample_chat, token_limit=50)
+print("Truncated Messages Count:", len(truncated_chat))
+print("Estimated API Cost:", manager.calculate_cost(prompt_tokens=450, completion_tokens=120), "USD")
+```
+
+---
+
+## 📂 Role 1: Core AI & Machine Learning Fundamentals Round
 
 ---
 
@@ -168,7 +318,7 @@ print("T=2.0 (Flat/Creative):     ", softmax_with_temperature(logits, temperatur
 
 ---
 
-## 📂 Role 1: GenAI / LLM Application Engineer (Full-Stack & Applied AI)
+## 📂 Role 2: GenAI / LLM Application Engineer (Full-Stack & Applied AI)
 
 ---
 
@@ -468,7 +618,7 @@ $$\text{Cost}_{\text{avg}} = (0.60 \times \$0.00005) + (0.30 \times \$0.0003) + 
 
 ---
 
-## 📂 Role 2: GenAI Research & Fine-Tuning Engineer / Applied Scientist
+## 📂 Role 3: GenAI Research & Fine-Tuning Engineer / Applied Scientist
 
 ---
 
@@ -571,7 +721,7 @@ $$A_i = \frac{r_i - \text{mean}(\{r_1, \dots, r_G\})}{\text{std}(\{r_1, \dots, r
 
 ---
 
-## 📂 Role 3: GenAI Infrastructure, ML Platform & MLOps Engineer
+## 📂 Role 4: GenAI Infrastructure, ML Platform & MLOps Engineer
 
 ---
 
@@ -642,7 +792,7 @@ $$s_x = \arg\min_s \left\| W X - \text{Quantize}(W \cdot \text{diag}(s)) \cdot \
 
 ---
 
-## 📂 Role 4: Lead / Principal / Staff GenAI Architect
+## 📂 Role 5: Lead / Principal / Staff GenAI Architect
 
 ---
 
@@ -676,7 +826,7 @@ $$s_x = \arg\min_s \left\| W X - \text{Quantize}(W \cdot \text{diag}(s)) \cdot \
 
 ---
 
-## 📂 Role 5: AI Safety, Security, Guardrails & Enterprise Compliance
+## 📂 Role 6: AI Safety, Security, Guardrails & Enterprise Compliance
 
 ---
 
@@ -766,11 +916,11 @@ def search_rag_with_rbac(query_vector: list, user_tenant_id: str, user_clearance
 
 Before stepping into your MAANG interview room, check off every box:
 
+- [ ] 🌱 **Junior Fundamentals**: Can write pure Python/NumPy vector search (cosine similarity) and token budget truncators without relying on high-level libraries.
 - [ ] 🧮 **GPU Memory Math**: Can calculate exact FP16 weight VRAM, KV cache size, and Adam optimizer overhead on a whiteboard in 60 seconds.
 - [ ] ⚡ **KV Cache Optimization**: Can explain Grouped-Query Attention (GQA) ratios and PagedAttention virtual memory block tables.
 - [ ] 📐 **Fine-Tuning Formulations**: Can derive LoRA ($W_0 + \frac{\alpha}{r}BA$), QLoRA NF4 quantization, and DPO loss functions from memory.
 - [ ] 🚀 **Inference Acceleration**: Can explain Speculative Decoding rejection sampling math, continuous batching, and FP8 Tensor Core speedups.
-- [ ] 🧠 **Post-Training at Scale**: Can explain why GRPO eliminates the Value/Critic model in reasoning models like DeepSeek-R1 and OpenAI o1.
 - [ ] 🛡️ **Security & Guardrails**: Can design end-to-end indirect prompt injection defenses, pre-filtered vector RBAC queries, and streaming PII redactors.
 
 ---
