@@ -3,7 +3,7 @@
 > 🎯 **Target Roles**: GenAI Application Engineer | Applied AI Scientist | GenAI Infrastructure & MLOps Engineer | Lead / Principal AI Architect  
 > 🏷️ **Seniority Levels**: 🥉 Mid-Level (L4/E4) | 🥈 Senior (L5/E5) | 🥇 Staff / Principal (L6+/E6+)  
 > 🏢 **Target Companies**: Meta | Google (DeepMind/GCP) | Amazon (AWS/Bedrock) | Apple | Netflix | OpenAI  
-> 📌 **Repository**: [Cracking The GenAI Portfolio](README.md)  
+> 📌 **Repository**: [Cracking The GenAI Portfolio](README.md) | [GenAI Glossary Cheat Sheet](GENAI_GLOSSARY_CHEATSHEET.md)  
 
 ---
 
@@ -11,10 +11,12 @@
 
 | Interview Role | ⚡ 1-Sentence Secret to Pass | 🎯 Key Formula / Concept |
 | :--- | :--- | :--- |
+| 🌱 **AI/ML Fundamentals** | Explain Byte-Pair Encoding (BPE) vocabulary merging and how Softmax temperature $T$ flattens/sharpens logit probabilities. | $$P(y_i) = \frac{\exp(z_i / T)}{\sum_j \exp(z_j / T)}$$ |
 | 🤖 **GenAI App Engineer** | Don't just suggest `LangChain`. Build concurrent hybrid RAG (BM25 + Dense RRF) and stream tokens via SSE to keep TTFT < 200ms. | $$RRF = \sum \frac{1}{60 + \text{rank}}$$ |
 | 🔬 **Applied AI Scientist** | Derive LoRA ($W_0 + \frac{\alpha}{r}BA$) and DPO implicit loss from scratch; explain why DPO drops the PPO reward model & critic. | $$\mathcal{L}\_{\text{DPO}} = -\log \sigma \left(\beta \log \frac{\pi\_{\theta}}{\pi\_{\text{ref}}}\right)$$ |
 | ⚡ **GenAI Infra / MLOps** | Explain how PagedAttention cuts KV cache waste from 60% → 4% and why FP8 Tensor Cores give 2x GEMM speed over FP16 on H100s. | $$\text{VRAM} = \frac{P \times b}{\text{Quant}} + \text{KV Cache}$$ |
 | 🏛️ **Lead / Staff Architect** | Design multi-tier model cascades: route 60% queries to local 2B SLMs ($0.00005/req) to keep total cost < $0.001/query. | $$\text{Cost} = \sum c(m_i) P(m_i)$$ |
+| 🛡️ **AI Safety & Security** | Mitigate indirect prompt injection in RAG via structural context tags (`<context>`), pre-filtered vector RBAC ACL masks, and Presidio PII DLP. | $$\text{Filter: } \text{tenant\_id} == T_{\text{req}}$$ |
 
 ---
 
@@ -22,6 +24,8 @@
 - [🎯 Master Strategy: How to Crack 100% of MAANG GenAI Interviews](#-master-strategy-how-to-crack-100-of-maang-genai-interviews)
   - [1️⃣ The 6-Step MAANG GenAI System Design Blueprint](#1️⃣-the-6-step-maang-genai-system-design-blueprint)
   - [2️⃣ Mathematical Quick Reference & VRAM Cheat Sheet](#2️⃣-mathematical-quick-reference--vram-cheat-sheet)
+- [📂 Role 0: Core AI & Machine Learning Fundamentals Round](#-role-0-core-ai--machine-learning-fundamentals-round)
+  - [🥉 Mid (L4/E4): Tokenization Mechanics, Temperature Sampling & Softmax Logits (Google / Meta)](#-mid-l4e4-tokenization-mechanics-temperature-sampling--softmax-logits-google--meta)
 - [📂 Role 1: GenAI / LLM Application Engineer (Full-Stack & Applied AI)](#-role-1-genai--llm-application-engineer-full-stack--applied-ai)
   - [🥉 Mid (L4/E4): Designing Low-TTFT Technical Doc RAG (Google)](#-mid-l4e4-designing-low-ttft-technical-doc-rag-google)
   - [🥉 Mid (L4/E4): Multi-Tier Guardrailing & Hallucination Defense (Amazon)](#-mid-l4e4-multi-tier-guardrailing--hallucination-defense-amazon)
@@ -41,6 +45,8 @@
 - [📂 Role 4: Lead / Principal / Staff GenAI Architect](#-role-4-lead--principal--staff-genai-architect)
   - [🥇 Staff (L6): Automated Enterprise Vulnerability & Security Patch Agent (Meta / Apple)](#-staff-l6-automated-enterprise-vulnerability--security-patch-agent-meta--apple)
   - [🏆 Principal (L7): Enterprise Model Gateway, Dynamic Cascading Router & Cache (Netflix / Google)](#-principal-l7-enterprise-model-gateway-dynamic-cascading-router--cache-netflix--google)
+- [📂 Role 5: AI Safety, Security, Guardrails & Enterprise Compliance](#-role-5-ai-safety-security-guardrails--enterprise-compliance)
+  - [🥇 Staff / Principal (L6+): Preventing Indirect Prompt Injection, Vector RBAC & SOC2/HIPAA Compliance (AWS / GCP)](#-staff--principal-l6-preventing-indirect-prompt-injection-vector-rbac--soc2hipaa-compliance-aws--gcp)
 - [📊 Final Pre-Interview Mastery Checklist](#-final-pre-interview-mastery-checklist)
 
 ---
@@ -105,6 +111,60 @@ $$\text{Memory}_{\text{training}} \approx 16 \times P \text{ bytes}$$
 * **Model Weights (FP16)**: $2P$ bytes  
 * **Gradients (FP16)**: $2P$ bytes  
 * **Adam Optimizer State (FP32)**: $12P$ bytes ($4P$ for FP32 master weights, $4P$ for 1st moment, $4P$ for 2nd moment).
+
+---
+
+## 📂 Role 0: Core AI & Machine Learning Fundamentals Round
+
+---
+
+### 🥉 Mid (L4/E4): Tokenization Mechanics, Temperature Sampling & Softmax Logits (Google / Meta)
+
+> 🏢 **Company**: Google / Meta  
+> 🧠 **Concepts**: Byte-Pair Encoding (BPE), Logit Softmax Transformation, Sampling Temperature ($T$), Sub-word Token Splitting.
+
+> [!NOTE]
+> ⚡ **10-Second TL;DR**:  
+> LLMs don't read words or letters — they process sub-word token IDs generated via **Byte-Pair Encoding (BPE)**. Temperature $T$ scales raw logits ($z_i / T$) before Softmax: $T \to 0$ forces greedy deterministic output ($\arg\max$), while $T > 1.0$ flattens probabilities to increase output variety.
+
+#### 🎯 Question Statement
+"Explain how Byte-Pair Encoding (BPE) tokenization operates. Why do modern LLMs struggle with character-counting tasks (e.g. counting the letter 'r' in 'strawberry'), and how does adjusting sampling temperature $T$ alter logit probability distributions?"
+
+#### 📐 Softmax Temperature Formula
+$$P(y_i) = \frac{\exp(z_i / T)}{\sum_j \exp(z_j / T)}$$
+
+```text
+Logit z_i ──► [ Scale by 1/T ] ──► [ Exp(z_i / T) ] ──► [ Normalize Sum ] ──► Prob P(y_i)
+```
+
+#### 💻 Python BPE & Temperature Demo
+
+```python
+import numpy as np
+
+def softmax_with_temperature(logits: np.ndarray, temperature: float = 1.0) -> np.ndarray:
+    if temperature <= 0.0:
+        # Greedy Argmax (Temperature = 0)
+        probs = np.zeros_like(logits)
+        probs[np.argmax(logits)] = 1.0
+        return probs
+        
+    # Scale logits by temperature
+    scaled_logits = logits / temperature
+    # Subtract max for numerical stability (prevents overflow)
+    exp_logits = np.exp(scaled_logits - np.max(scaled_logits))
+    return exp_logits / np.sum(exp_logits)
+
+# Example: Logits for 3 candidate tokens
+logits = np.array([2.0, 1.0, 0.1])
+print("T=0.2 (Sharp/Deterministic):", softmax_with_temperature(logits, temperature=0.2))
+print("T=1.0 (Standard):          ", softmax_with_temperature(logits, temperature=1.0))
+print("T=2.0 (Flat/Creative):     ", softmax_with_temperature(logits, temperature=2.0))
+```
+
+> [!TIP]
+> 🚀 **MAANG Interviewer Edge**:  
+> Tell the interviewer: *"LLMs fail to count letters in 'strawberry' because BPE tokenizers group 'straw' and 'berry' into single token IDs `[42821, 14210]`. The attention layers operate on token vectors, never seeing the underlying character bytes unless explicitly prompted to spell out words character-by-character!"*
 
 ---
 
@@ -616,6 +676,92 @@ $$s_x = \arg\min_s \left\| W X - \text{Quantize}(W \cdot \text{diag}(s)) \cdot \
 
 ---
 
+## 📂 Role 5: AI Safety, Security, Guardrails & Enterprise Compliance
+
+---
+
+### 🥇 Staff / Principal (L6+): Preventing Indirect Prompt Injection, Vector RBAC & SOC2/HIPAA Compliance (AWS / GCP)
+
+> 🏢 **Company**: AWS / GCP  
+> 🧠 **Concepts**: Direct vs. Indirect Prompt Injection, Vector DB Pre-filtering RBAC/ABAC, Presidio PII DLP, Zero Data Retention (ZDR).
+
+> [!NOTE]
+> ⚡ **10-Second TL;DR**:  
+> Indirect prompt injection is the #1 enterprise RAG security vulnerability. Block it by enforcing structural prompt tags (`<context>`), isolating untrusted text data from instructions, applying **pre-filtering payload masks (RBAC)** in vector databases, and using streaming token PII buffers!
+
+#### 🎯 Question Statement
+"Architect an enterprise AI security and compliance platform for a multi-tenant healthcare/financial RAG assistant. How do you defend against indirect prompt injection embedded inside uploaded PDF context, enforce tenant-level role-based access control (RBAC) in vector search, and guarantee SOC 2 Type II / HIPAA Zero-Data-Retention SLAs?"
+
+#### 🏗️ Enterprise AI Security Blueprint
+
+```text
+[ User Query + OAuth JWT Token ]
+                │
+                ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🛡️ STAGE 1: Edge API Gateway (Envoy + PII Redaction)                         │
+│   Extracts Tenant ID & Clearance Level | Runs Presidio PII Masking           │
+└──────────────────────┬──────────────────────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🔑 STAGE 2: Pre-Filtered Vector DB Search (Qdrant / Milvus)                 │
+│   Enforces Pre-Filter Payload Mask: `tenant_id == T AND clearance <= U`     │
+└──────────────────────┬──────────────────────────────────────────────────────┘
+                       │ (Retrieved Chunks)
+                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🔒 STAGE 3: Structural Context Sanitization & Prompt Isolation              │
+│   Wraps untrusted chunk data inside `<untrusted_context>` XML tags           │
+│   Applies Indirect Prompt Injection ONNX Scanner                            │
+└──────────────────────┬──────────────────────────────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ ⚡ STAGE 4: Enterprise LLM Engine (Zero-Data-Retention SLA)                  │
+│   KMS Envelope Encryption | Ephemeral Memory | SSE Output PII Stream Buffer │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### 💻 Vector DB Pre-Filtering RBAC Code (Qdrant)
+
+```python
+from qdrant_client import QdrantClient
+from qdrant_client.http import models
+
+qdrant_client = QdrantClient(host="localhost", port=6333)
+
+def search_rag_with_rbac(query_vector: list, user_tenant_id: str, user_clearance_level: int):
+    # 🔒 Enforce PRE-FILTERING (Filtering vectors BEFORE graph traversal)
+    rbac_filter = models.Filter(
+        must=[
+            models.FieldCondition(
+                key="tenant_id",
+                match=models.MatchValue(value=user_tenant_id)
+            ),
+            models.FieldCondition(
+                key="security_clearance",
+                range=models.Range(lte=user_clearance_level)
+            )
+        ]
+    )
+    
+    # Search Qdrant vector database with strict tenant RBAC filter
+    search_results = qdrant_client.search(
+        collection_name="enterprise_docs",
+        query_vector=query_vector,
+        query_filter=rbac_filter,
+        limit=5
+    )
+    return search_results
+```
+
+> [!TIP]
+> 🚀 **MAANG Interviewer Edge**:  
+> Tell the interviewer: *"Never use post-filtering (retrieving top 100 vectors then dropping unauthorized ones in Python code) because if top candidate vectors belong to another tenant, post-filtering severely degrades recall. Pre-filtering inside HNSW payload masks guarantees 100% recall over authorized documents!"*
+
+---
+
 ## 📊 Final Pre-Interview Mastery Checklist
 
 Before stepping into your MAANG interview room, check off every box:
@@ -625,7 +771,7 @@ Before stepping into your MAANG interview room, check off every box:
 - [ ] 📐 **Fine-Tuning Formulations**: Can derive LoRA ($W_0 + \frac{\alpha}{r}BA$), QLoRA NF4 quantization, and DPO loss functions from memory.
 - [ ] 🚀 **Inference Acceleration**: Can explain Speculative Decoding rejection sampling math, continuous batching, and FP8 Tensor Core speedups.
 - [ ] 🧠 **Post-Training at Scale**: Can explain why GRPO eliminates the Value/Critic model in reasoning models like DeepSeek-R1 and OpenAI o1.
-- [ ] 🏗️ **Systems Design**: Can blueprint multi-agent DAGs, hybrid RAG (BM25 + Dense RRF), multi-tiered guardrails, and enterprise multi-cloud gateways.
+- [ ] 🛡️ **Security & Guardrails**: Can design end-to-end indirect prompt injection defenses, pre-filtered vector RBAC queries, and streaming PII redactors.
 
 ---
 *This guide is part of the [Cracking The GenAI Portfolio](README.md) open-source repository.*
