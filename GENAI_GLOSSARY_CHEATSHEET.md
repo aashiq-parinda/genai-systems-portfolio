@@ -346,7 +346,7 @@ where $\epsilon$ is the privacy loss budget.
 * ⚡ **1-Sentence Definition**: Security filtering mechanisms that restrict vector database chunk retrieval based on the requesting user's identity and clearance level.
 * 🧠 **MAANG Systems Mechanics**: Embeds metadata access control lists (ACLs) into payload fields of HNSW vector indices. During similarity search, Qdrant/Milvus applies a **pre-filtering payload mask**:
 
-$$\text{Filter: } \text{tenant\_id} == T_{\text{req}} \;\text{AND}\; \text{clearance\_level} \le U_{\text{user}}$$
+$$\text{Filter: } \text{tenant}_{\text{id}} = T_{\text{req}} \quad \text{AND} \quad \text{clearance}_{\text{level}} \le U_{\text{user}}$$
 
 * 💡 **Interview Gotcha**: Always use **pre-filtering** (filtering vectors before graph traversal) rather than post-filtering (retrieving 100 vectors then dropping unauthorized ones), because post-filtering severely degrades recall if top candidates are inaccessible.
 

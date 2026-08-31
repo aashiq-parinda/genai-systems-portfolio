@@ -16,7 +16,7 @@
 | 🔬 **Applied AI Scientist** | Derive LoRA ($W_0 + \frac{\alpha}{r}BA$) and DPO implicit loss from scratch; explain why DPO drops the PPO reward model & critic. | $$\mathcal{L}\_{\text{DPO}} = -\log \sigma \left(\beta \log \frac{\pi\_{\theta}}{\pi\_{\text{ref}}}\right)$$ |
 | ⚡ **GenAI Infra / MLOps** | Explain how PagedAttention cuts KV cache waste from 60% → 4% and why FP8 Tensor Cores give 2x GEMM speed over FP16 on H100s. | $$\text{VRAM} = \frac{P \times b}{\text{Quant}} + \text{KV Cache}$$ |
 | 🏛️ **Lead / Staff Architect** | Design multi-tier model cascades: route 60% queries to local 2B SLMs ($0.00005/req) to keep total cost < $0.001/query. | $$\text{Cost} = \sum c(m_i) P(m_i)$$ |
-| 🛡️ **AI Safety & Security** | Mitigate indirect prompt injection in RAG via structural context tags (`<context>`), pre-filtered vector RBAC ACL masks, and Presidio PII DLP. | $$\text{Filter: } \text{tenant\_id} == T_{\text{req}}$$ |
+| 🛡️ **AI Safety & Security** | Mitigate indirect prompt injection in RAG via structural context tags (`<context>`), pre-filtered vector RBAC ACL masks, and Presidio PII DLP. | $$\text{Filter: } \text{tenant}_{\text{id}} = T_{\text{req}}$$ |
 
 ---
 
