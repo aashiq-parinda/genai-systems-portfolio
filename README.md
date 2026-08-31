@@ -9,7 +9,9 @@
 
 > **Production-grade applied Generative AI, LLM infrastructure, and scientific benchmarking portfolio** engineered for mid-to-senior GenAI / Machine Learning Systems roles at top-tier technology companies (Google, Meta, Amazon, Apple, Netflix).
 
-> 🎓 **MAANG Interview Guide**: Looking for GenAI interview preparation? Check out our comprehensive guide: **[MAANG GenAI & LLM Engineering Interview Guide](MAANG_GENAI_INTERVIEW_GUIDE.md)**, featuring 15+ real-world questions organized by Role (App Eng, Research/Fine-Tuning, Infra/MLOps, Principal Architect) and Seniority (Mid, Senior, Staff/Principal) with complete production-grade answers, GPU arithmetic, and system blueprints!
+> 🎓 **MAANG Interview Resources**:
+> * 📘 **[MAANG GenAI & LLM Engineering Interview Guide](MAANG_GENAI_INTERVIEW_GUIDE.md)**: 15+ real-world interview scenarios organized by Role and Seniority with GPU arithmetic & system blueprints!
+> * 📚 **[GenAI & LLM Glossary Cheat Sheet](GENAI_GLOSSARY_CHEATSHEET.md)**: 30+ core terms spanning Level 0 ML Fundamentals (Tokenization, AdamW, Loss) to Level 3 Infrastructure (FlashAttention-3, PagedAttention, GRPO, 3D Parallelism)!
 
 ---
 
