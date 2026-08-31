@@ -11,10 +11,10 @@
 
 | Interview Role | ⚡ 1-Sentence Secret to Pass | 🎯 Key Formula / Concept |
 | :--- | :--- | :--- |
-| 🤖 **GenAI App Engineer** | Don't just suggest `LangChain`. Build concurrent hybrid RAG (BM25 + Dense RRF) and stream tokens via SSE to keep TTFT < 200ms. | `RRF = ∑ [ 1 / (60 + rank) ]` |
-| 🔬 **Applied AI Scientist** | Derive LoRA (`W = W₀ + (α/r)·B·A`) and DPO implicit loss from scratch; explain why DPO drops the PPO reward model & critic. | `L_DPO = -E[ log σ( β log( π_θ / π_ref ) ) ]` |
-| ⚡ **GenAI Infra / MLOps** | Explain how PagedAttention cuts KV cache waste from 60% → 4% and why FP8 Tensor Cores give 2x GEMM speed over FP16 on H100s. | `VRAM = (P × b / Quant) + KV_Cache` |
-| 🏛️ **Lead / Staff Architect** | Design multi-tier model cascades: route 60% queries to local 2B SLMs ($0.00005/req) to keep total cost < $0.001/query. | `Cost = ∑ [ c(m_i) × P(m_i) ]` |
+| 🤖 **GenAI App Engineer** | Don't just suggest `LangChain`. Build concurrent hybrid RAG (BM25 + Dense RRF) and stream tokens via SSE to keep TTFT < 200ms. | $$RRF = \sum \frac{1}{60 + \text{rank}}$$ |
+| 🔬 **Applied AI Scientist** | Derive LoRA ($W_0 + \frac{\alpha}{r}BA$) and DPO implicit loss from scratch; explain why DPO drops the PPO reward model & critic. | $\mathcal{L}_{\text{DPO}} = -\log \sigma \left(\beta \log \frac{\pi_\theta}{\pi_{\text{ref}}}\right)$ |
+| ⚡ **GenAI Infra / MLOps** | Explain how PagedAttention cuts KV cache waste from 60% → 4% and why FP8 Tensor Cores give 2x GEMM speed over FP16 on H100s. | $\text{VRAM} = \frac{P \times b}{\text{Quant}} + \text{KV Cache}$ |
+| 🏛️ **Lead / Staff Architect** | Design multi-tier model cascades: route 60% queries to local 2B SLMs ($0.00005/req) to keep total cost < $0.001/query. | $\text{Cost} = \sum c(m_i) P(m_i)$ |
 
 ---
 
@@ -89,28 +89,22 @@ When given any GenAI system design prompt at Meta, Google, or Amazon, follow thi
 Keep these formulas memorized for rapid whiteboarding arithmetic:
 
 #### 🧮 A. Model Weight VRAM Calculation
-
 $$\text{Memory}_{\text{weights}} = \frac{P \times b}{\text{Quantization Factor}}$$
-
-* `P` = Parameters (in billions), `b` = Precision bytes (FP16 = 2, FP32 = 4, INT8 = 1, INT4 = 0.5).
-* 💡 *Quick Example*: **70B parameter model in FP16** requires `70 × 2 = 140 GB` VRAM. In **4-bit (NF4)**, it requires `70 × 0.5 = 35 GB` VRAM!
+* $P$ = Parameters (in billions), $b$ = Precision bytes (FP16 = 2, FP32 = 4, INT8 = 1, INT4 = 0.5).
+* 💡 *Quick Example*: **70B parameter model in FP16** requires $70 \times 2 = \mathbf{140\text{ GB}}$ VRAM. In **4-bit (NF4)**, it requires $70 \times 0.5 = \mathbf{35\text{ GB}}$ VRAM!
 
 #### 🧮 B. KV Cache Memory Footprint per Sequence
-
 $$\text{Memory}_{\text{KV}} = 2 \times L \times H_{\text{KV}} \times D_{\text{head}} \times S \times B \times b$$
-
-* `L` = Layers, `H_KV` = Key-Value Heads, `D_head` = Head Dimension (`d_model / H_query`), `S` = Sequence Length, `B` = Batch Size, `b` = Precision bytes.
+* $L$ = Layers, $H_{\text{KV}}$ = Key-Value Heads, $D_{\text{head}}$ = Head Dimension ($d_{\text{model}} / H_{\text{query}}$), $S$ = Sequence Length, $B$ = Batch Size, $b$ = Precision bytes.
 
 > [!TIP]
-> ⚡ **Grouped-Query Attention (GQA) Magic**: In Llama-3-70B, `H_query = 64` but `H_KV = 8` (8:1 ratio). This reduces KV cache memory consumption by **8x**, enabling much larger batch sizes (`B`)!
+> ⚡ **Grouped-Query Attention (GQA) Magic**: In Llama-3-70B, $H_{\text{query}} = 64$ but $H_{\text{KV}} = 8$ (8:1 ratio). This reduces KV cache memory consumption by **8x**, enabling much larger batch sizes ($B$)!
 
 #### 🧮 C. Total Training Memory (Adam Optimizer)
-
 $$\text{Memory}_{\text{training}} \approx 16 \times P \text{ bytes}$$
-
-* **Model Weights (FP16)**: `2P` bytes  
-* **Gradients (FP16)**: `2P` bytes  
-* **Adam Optimizer State (FP32)**: `12P` bytes (`4P` for FP32 master weights, `4P` for 1st moment, `4P` for 2nd moment).
+* **Model Weights (FP16)**: $2P$ bytes  
+* **Gradients (FP16)**: $2P$ bytes  
+* **Adam Optimizer State (FP32)**: $12P$ bytes ($4P$ for FP32 master weights, $4P$ for 1st moment, $4P$ for 2nd moment).
 
 ---
 
@@ -155,8 +149,7 @@ $$\text{Memory}_{\text{training}} \approx 16 \times P \text{ bytes}$$
 Combining BM25 keyword matching with Dense Vector Cosine Similarity:
 
 $$RRF\_Score(d \in D) = \sum_{m \in M} \frac{1}{k + r_m(d)}$$
-
-where `k = 60`, `M` is search systems (BM25, Dense), and `r_m(d)` is document rank.
+where $k = 60$, $M$ is search systems (BM25, Dense), and $r_m(d)$ is document rank.
 
 #### 💻 Concurrent Hybrid RAG Code Implementation
 
@@ -373,7 +366,7 @@ class AgentExecutionDAG:
 
 > [!NOTE]
 > ⚡ **10-Second TL;DR**:  
-> To guarantee **< $0.001 per query cost**, build a **Complexity Evaluator Router**: send 60% simple queries to fast on-device SLMs ($0.00005/req), 30% queries to self-hosted 8B models ($0.0003/req), and reserve expensive frontier models (GPT-4o/Llama-70B) for top 10% hard queries!
+> To guarantee **<$0.001 per query cost**, build a **Complexity Evaluator Router**: send 60% simple queries to fast on-device SLMs ($0.00005/req), 30% queries to self-hosted 8B models ($0.0003/req), and reserve expensive frontier models (GPT-4o/Llama-70B) for top 10% hard queries!
 
 #### 🏗️ Enterprise Multi-Tenant Architecture
 
@@ -410,9 +403,7 @@ class AgentExecutionDAG:
 ```
 
 #### 🧮 Weighted Cost Calculation Formula
-
 $$\text{Cost}_{\text{avg}} = (0.60 \times \$0.00005) + (0.30 \times \$0.0003) + (0.10 \times \$0.004) = \mathbf{\$0.00052 \text{ / query}}$$
-
 *(Well under the $0.001 enterprise budget threshold!)*
 
 ---
@@ -428,13 +419,11 @@ $$\text{Cost}_{\text{avg}} = (0.60 \times \$0.00005) + (0.30 \times \$0.0003) + 
 
 > [!NOTE]
 > ⚡ **10-Second TL;DR**:  
-> LoRA freezes base weights `W₀` and trains low-rank matrices `B · A`. **QLoRA compresses base weights to 4-bit NF4**, reducing 70B fine-tuning VRAM from **1,120 GB down to 41.4 GB**, enabling a 70B model to be trained on a **single 80GB A100 GPU**!
+> LoRA freezes base weights $W_0$ and trains low-rank matrices $B \cdot A$. **QLoRA compresses base weights to 4-bit NF4**, reducing 70B fine-tuning VRAM from **1,120 GB down to 41.4 GB**, enabling a 70B model to be trained on a **single 80GB A100 GPU**!
 
 #### 📐 LoRA Formula
-
 $$h = W_0 x + \Delta W x = W_0 x + \frac{\alpha}{r} (B A) x$$
-
-* Matrix `A` initialized via Gaussian `N(0, σ²)`, Matrix `B` initialized to `0`.
+* Matrix $A \in \mathbb{R}^{r \times k}$ initialized via $\mathcal{N}(0, \sigma^2)$, Matrix $B \in \mathbb{R}^{d \times r}$ initialized to $0$.
 
 ```text
                      Full Weight W_0 (Frozen)
@@ -456,7 +445,7 @@ $$h = W_0 x + \Delta W x = W_0 x + \frac{\alpha}{r} (B A) x$$
 | Memory Component | Full Fine-Tuning (FP16) | LoRA (FP16 Adapt + FP16 Base) | QLoRA (NF4 Base + FP16 Adapt) |
 | :--- | :--- | :--- | :--- |
 | **Base Model Weights** | 140 GB (FP16) | 140 GB (FP16) | **35 GB (NF4)** |
-| **Adapter Parameters (`r = 16`)** | 0 GB | 0.8 GB | 0.8 GB |
+| **Adapter Parameters ($r=16$)** | 0 GB | 0.8 GB | 0.8 GB |
 | **Gradients** | 140 GB | 0.8 GB | 0.8 GB |
 | **Optimizer States (Adam)** | 840 GB (FP32) | 4.8 GB (FP32) | 4.8 GB (FP32) |
 | **💾 Total VRAM Required** | **~1,120 GB (14x H100s)** | **~146 GB (2x H100s)** | **~41.4 GB (1x A100 80GB! 🎉)** |
@@ -470,7 +459,7 @@ $$h = W_0 x + \Delta W x = W_0 x + \frac{\alpha}{r} (B A) x$$
 
 > [!NOTE]
 > ⚡ **10-Second TL;DR**:  
-> DPO mathematically re-parameterizes the reward function in terms of policy weights `π_θ(y|x) / π_ref(y|x)`. This **completely eliminates training a separate Reward Model & Critic network**, making alignment fast and stable!
+> DPO mathematically re-parameterizes the reward function in terms of policy weights $\pi_\theta(y \mid x) / \pi_{\text{ref}}(y \mid x)$. This **completely eliminates training a separate Reward Model & Critic network**, making alignment fast and stable!
 
 #### 📐 DPO Loss Function Derivation
 Starting from the Bradley-Terry preference model $P(y_w \succ y_l \mid x) = \sigma(r(x, y_w) - r(x, y_l))$, substituting the implicit reward yields:
@@ -501,10 +490,9 @@ $$\mathcal{L}_{\text{DPO}}(\theta; \pi_{\text{ref}}) = -\mathbb{E}_{(x, y_w, y_l
 
 > [!NOTE]
 > ⚡ **10-Second TL;DR**:  
-> Models like **DeepSeek-R1** and **OpenAI o1** use **GRPO** (Group Relative Policy Optimization) instead of PPO. GRPO samples a group of `G` outputs for a prompt and calculates relative normalized advantage across the group, **eliminating the Value (Critic) model completely**!
+> Models like **DeepSeek-R1** and **OpenAI o1** use **GRPO** (Group Relative Policy Optimization) instead of PPO. GRPO samples a group of $G$ outputs for a prompt and calculates relative normalized advantage across the group, **eliminating the Value (Critic) model completely**!
 
 #### 📐 GRPO Advantage Calculation
-
 $$A_i = \frac{r_i - \text{mean}(\{r_1, \dots, r_G\})}{\text{std}(\{r_1, \dots, r_G\})}$$
 
 ```text
@@ -534,7 +522,7 @@ $$A_i = \frac{r_i - \text{mean}(\{r_1, \dots, r_G\})}{\text{std}(\{r_1, \dots, r
 
 > [!NOTE]
 > ⚡ **10-Second TL;DR**:  
-> Static batching wastes GPU compute on padding tokens. **Continuous batching** operates at the iteration level to inject new queries immediately. **PagedAttention** organizes KV cache into non-contiguous physical pages, cutting memory waste from **60% → < 4%**!
+> Static batching wastes GPU compute on padding tokens. **Continuous batching** operates at the iteration level to inject new queries immediately. **PagedAttention** organizes KV cache into non-contiguous physical pages, cutting memory waste from **60% → <4%**!
 
 ```text
 LOGICAL KV BLOCKS                BLOCK TABLE               PHYSICAL GPU MEMORY PAGES
@@ -555,7 +543,6 @@ LOGICAL KV BLOCKS                BLOCK TABLE               PHYSICAL GPU MEMORY P
 > **AWQ** protects the top 1% salient weight channels via per-channel scaling without hardware speed penalties. On **NVIDIA H100 GPUs**, native **FP8 (E4M3/E5M2)** delivers **2x GEMM throughput** over FP16 with zero perplexity loss!
 
 #### 📐 AWQ Scaling Formula
-
 $$s_x = \arg\min_s \left\| W X - \text{Quantize}(W \cdot \text{diag}(s)) \cdot \text{diag}(s)^{-1} X \right\|$$
 
 ---
@@ -621,7 +608,7 @@ $$s_x = \arg\min_s \left\| W X - \text{Quantize}(W \cdot \text{diag}(s)) \cdot \
 
 > [!NOTE]
 > ⚡ **10-Second TL;DR**:  
-> Architect a multi-cloud AI Gateway serving 1 Billion requests/day: run rate-limiting and PII redaction inside an **Envoy C++ proxy filter (< 1.2ms latency)**, hit a **Redis Semantic Cache**, and dynamically fallback (vLLM → Azure OpenAI → AWS Bedrock) if upstream errors spike!
+> Architect a multi-cloud AI Gateway serving 1 Billion requests/day: run rate-limiting and PII redaction inside an **Envoy C++ proxy filter (<1.2ms latency)**, hit a **Redis Semantic Cache**, and dynamically fallback (vLLM → Azure OpenAI → AWS Bedrock) if upstream errors spike!
 
 ```text
 [ Global Requests ] ──► [ Envoy C++ Proxy Gateway (<1.2ms) ] ──► [ Redis Semantic Cache ] ──► [ Dynamic Cascading Router ] ──► [ Upstream LLM Providers ]
@@ -635,7 +622,7 @@ Before stepping into your MAANG interview room, check off every box:
 
 - [ ] 🧮 **GPU Memory Math**: Can calculate exact FP16 weight VRAM, KV cache size, and Adam optimizer overhead on a whiteboard in 60 seconds.
 - [ ] ⚡ **KV Cache Optimization**: Can explain Grouped-Query Attention (GQA) ratios and PagedAttention virtual memory block tables.
-- [ ] 📐 **Fine-Tuning Formulations**: Can derive LoRA (`W = W₀ + (α/r)·B·A`), QLoRA NF4 quantization, and DPO loss functions from memory.
+- [ ] 📐 **Fine-Tuning Formulations**: Can derive LoRA ($W_0 + \frac{\alpha}{r}BA$), QLoRA NF4 quantization, and DPO loss functions from memory.
 - [ ] 🚀 **Inference Acceleration**: Can explain Speculative Decoding rejection sampling math, continuous batching, and FP8 Tensor Core speedups.
 - [ ] 🧠 **Post-Training at Scale**: Can explain why GRPO eliminates the Value/Critic model in reasoning models like DeepSeek-R1 and OpenAI o1.
 - [ ] 🏗️ **Systems Design**: Can blueprint multi-agent DAGs, hybrid RAG (BM25 + Dense RRF), multi-tiered guardrails, and enterprise multi-cloud gateways.
