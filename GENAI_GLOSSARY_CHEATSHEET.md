@@ -8,7 +8,7 @@
 
 ## ⚡ 10-Second Executive Summary
 
-This glossary is engineered specifically for **MAANG GenAI technical interviews** — spanning from **Level 0 Basics** up to **Enterprise Guardrails, AI Security & Compliance**.
+This glossary is engineered specifically for **MAANG GenAI technical interviews** — spanning from **Level 0 Basics** up to **Industry-Standard Tools & Frameworks**.
 
 Each term is structured into 3 high-impact parts:
 1. ⚡ **1-Sentence Definition** (for instant recall).
@@ -27,6 +27,7 @@ Each term is structured into 3 high-impact parts:
 - [🤖 6. Multi-Agent Systems & Tool Calling](#-6-multi-agent-systems--tool-calling)
 - [🌐 7. Distributed Training & Parallelism](#-7-distributed-training--parallelism)
 - [🛡️ 8. Guardrails, AI Security, Privacy & Compliance](#-8-guardrails-ai-security-privacy--compliance)
+- [🧰 9. Industry Standard GenAI Tooling & Ecosystem](#-9-industry-standard-genai-tooling--ecosystem)
 
 ---
 
@@ -365,6 +366,78 @@ $$\text{Logits}_{\text{watermarked}} = \text{Logits} + \delta \cdot \mathbb{I}(t
 * ⚡ **1-Sentence Definition**: Enterprise compliance frameworks governing data privacy, audit trails, and zero-storage guarantees when processing customer prompts.
 * 🧠 **MAANG Systems Mechanics**: Requires **Zero Data Retention (ZDR)** agreements with LLM providers (ensuring API inputs/outputs are never written to persistent disk or used for training), coupled with KMS-managed client-side envelope encryption.
 * 💡 **Interview Gotcha**: Enterprise customers will refuse to deploy cloud LLM APIs without signed ZDR and SOC 2 Type II audit receipts.
+
+---
+
+## 🧰 9. Industry Standard GenAI Tooling & Ecosystem
+
+Below is the definitive reference matrix of famous tools used by engineering teams at MAANG and top-tier AI companies:
+
+### A. LLM Serving & Inference Engines
+
+| Tool & Official Link | ⚡ Purpose & Category | 🧠 MAANG Production Fit | 💡 Key Trade-Off / Alternative |
+| :--- | :--- | :--- | :--- |
+| 🚀 **[vLLM](https://github.com/vllm-project/vllm)** | Open-source high-throughput LLM serving engine | Standard for self-hosting Llama-3/Qwen models using **PagedAttention** and continuous batching. | Higher initial VRAM overhead for block manager vs. HuggingFace naive generation. |
+| ⚡ **[NVIDIA TensorRT-LLM](https://github.com/NVIDIA/TensorRT-LLM)** | NVIDIA C++ LLM acceleration library | Maximum throughput GEMM execution directly on NVIDIA H100/A100 Tensor Cores. | Requires C++ build steps & model compilation per GPU architecture. |
+| 🤗 **[TGI (Text Generation Inference)](https://github.com/huggingface/text-generation-inference)** | Hugging Face enterprise serving solution | Production model serving on Hugging Face Spaces & AWS JumpStart. | Commercial license restrictions for non-open-source deployment. |
+| 🦙 **[Ollama](https://github.com/ollama/ollama)** | Local CPU/GPU LLM runner | Edge deployment, local developer prototyping, and privacy-first desktop apps. | Built on `llama.cpp` — optimized for single-user desktop vs multi-tenant QPS server. |
+| ⚡ **[SGLang](https://github.com/sgl-project/sglang)** | Fast programming language for LLM workflows | Multi-turn prompt execution, structured JSON decoding, and RadixAttention caching. | Rapidly evolving API surface compared to vLLM. |
+
+---
+
+### B. Fine-Tuning, Alignment & Optimization
+
+| Tool & Official Link | ⚡ Purpose & Category | 🧠 MAANG Production Fit | 💡 Key Trade-Off / Alternative |
+| :--- | :--- | :--- | :--- |
+| 🚀 **[Microsoft DeepSpeed](https://github.com/microsoft/DeepSpeed)** | Distributed training & ZeRO optimizer | Scaling multi-node pre-training and fine-tuning across thousands of GPUs via ZeRO-1/2/3. | Complex configuration JSON vs PyTorch FSDP (Fully Sharded Data Parallel). |
+| 🔬 **[TRL (Transformer Reinforcement Learning)](https://github.com/huggingface/trl)** | Post-training alignment framework | Industry standard for **SFT, DPO, PPO, and GRPO** training loops. | Requires careful learning rate tuning for DPO loss stability. |
+| 🔌 **[Hugging Face PEFT](https://github.com/huggingface/peft)** | Parameter-Efficient Fine-Tuning library | Injecting LoRA, QLoRA, and AdaLoRA adapters into base models. | Adapter merging (`merge_and_unload()`) required before exporting to TensorRT. |
+| 🧮 **[bitsandbytes](https://github.com/bitsandbytes-foundation/bitsandbytes)** | 8-bit & 4-bit CUDA quantization | Powers **4-bit NF4 QLoRA** fine-tuning and 8-bit Adam optimizer states. | Dequantization overhead during forward pass vs native FP8 execution. |
+| ⚡ **[Unsloth](https://github.com/unslothai/unsloth)** | Fast 2x-5x fine-tuning library | Ultra-fast Llama-3 / Qwen / Mistral fine-tuning on single GPUs with 80% less memory. | Custom CUDA kernels require specific PyTorch/Triton versions. |
+| 📦 **[AutoAWQ](https://github.com/casper-hansen/AutoAWQ)** | Activation-aware 4-bit quantization | Quantizing HuggingFace models to INT4 AWQ for fast serving on vLLM. | Requires a calibration dataset to measure activation magnitudes. |
+
+---
+
+### C. Vector Databases & Knowledge Search
+
+| Tool & Official Link | ⚡ Purpose & Category | 🧠 MAANG Production Fit | 💡 Key Trade-Off / Alternative |
+| :--- | :--- | :--- | :--- |
+| 🦀 **[Qdrant](https://github.com/qdrant/qdrant)** | Rust vector search engine | High-performance vector RAG with complex metadata payload pre-filtering. | RAM memory intensive during index creation vs disk-based ANN. |
+| ⚡ **[Milvus](https://github.com/milvus-io/milvus)** | Distributed enterprise vector database | Billion-scale vector search clusters deployed on Kubernetes. | High operational complexity requiring etcd, MinIO, and Pulsar components. |
+| 🌲 **[Pinecone](https://www.pinecone.io/)** | Serverless vector database | Fully managed zero-ops vector storage with instant auto-scaling. | Closed-source SaaS pricing model vs self-hosted open source. |
+| 🟢 **[Chroma](https://github.com/chroma-core/chroma)** | Open-source developer vector database | Local prototyping, embedded Python RAG, and Jupyter Notebook demos. | Single-node architecture — not suitable for enterprise multi-region scaling. |
+
+---
+
+### D. Agentic Frameworks & Workflow Orchestration
+
+| Tool & Official Link | ⚡ Purpose & Category | 🧠 MAANG Production Fit | 💡 Key Trade-Off / Alternative |
+| :--- | :--- | :--- | :--- |
+| 🔀 **[LangGraph](https://github.com/langchain-ai/langgraph)** | Cyclical agent state machine framework | Production multi-agent DAGs with persistent state checkpointing and human-in-the-loop. | Steeper learning curve than linear DAG abstractions. |
+| 👥 **[CrewAI](https://github.com/crewAIInc/crewAI)** | Multi-agent role-playing framework | Quick setup of collaborative multi-agent teams with role specialization. | Less granular control over low-level state transitions than LangGraph. |
+| 🤖 **[Microsoft AutoGen](https://github.com/microsoft/autogen)** | Conversational multi-agent framework | Enterprise multi-agent code generation and automated debugging loops. | Complex event-driven state debugging across asynchronous agents. |
+| 🎓 **[Stanford DSPy](https://github.com/stanfordnlp/dspy)** | Declarative prompt compiler | Compiling text prompts into algorithmically optimized instruction modules. | Paradigmatic shift away from manual string prompt engineering. |
+
+---
+
+### E. Evaluation, Observability & Guardrails
+
+| Tool & Official Link | ⚡ Purpose & Category | 🧠 MAANG Production Fit | 💡 Key Trade-Off / Alternative |
+| :--- | :--- | :--- | :--- |
+| 📊 **[Ragas](https://github.com/exploring-robustness/ragas)** | Quantitative RAG evaluation harness | Measuring Faithfulness, Answer Relevance, and Context Recall. | Relies on LLM-as-a-judge (GPT-4) evaluation costs. |
+| 🔍 **[LangSmith](https://www.langchain.com/langsmith)** | Production LLM trace observability | Real-time token streaming tracing, latency breakdown, and evaluation datasets. | SaaS telemetry costs for high-throughput enterprise QPS. |
+| 🔥 **[Arize Phoenix](https://github.com/Arize-ai/phoenix)** | Open-source AI observability | Self-hosted prompt tracing, RAG evaluation, and embedding drift analysis. | Requires hosting your own telemetry collector backend. |
+| 🛡️ **[NVIDIA NeMo Guardrails](https://github.com/NVIDIA/NeMo-Guardrails)** | Programmable conversational rails | Enforcing safety, topical boundaries, and policy dialog rails via Colang. | Adds minor latency overhead per turn for guardrail checking. |
+| 🔒 **[Microsoft Presidio](https://github.com/microsoft/presidio)** | PII detection & anonymization engine | Real-time PII sanitization (SSN, credit card, phone) before LLM calls. | Requires custom regex tuning for domain-specific entity formats. |
+
+---
+
+### F. Enterprise Gateway & Model Routing
+
+| Tool & Official Link | ⚡ Purpose & Category | 🧠 MAANG Production Fit | 💡 Key Trade-Off / Alternative |
+| :--- | :--- | :--- | :--- |
+| 🌐 **[LiteLLM Proxy](https://github.com/BerriAI/litellm)** | Open-source OpenAI-spec API gateway | Standardizing calls to 100+ LLMs (OpenAI, Anthropic, Bedrock, vLLM) with load balancing and budget caps. | Adds a network proxy hop (1-2ms latency). |
+| 🔑 **[Portkey AI Gateway](https://portkey.ai/)** | Enterprise LLM routing proxy | Multi-cloud routing, automatic retries, fallback cascades, and fine-grained billing control. | Closed-source enterprise features vs LiteLLM open-source proxy. |
 
 ---
 *This cheat sheet is part of the [Cracking The GenAI Portfolio](README.md) open-source repository.*
