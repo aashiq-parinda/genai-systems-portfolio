@@ -1,0 +1,44 @@
+{
+  "tco_options": {
+    "Option_A_Train_From_Scratch": {
+      "name": "Train Custom Frontier Model From Scratch",
+      "year_1_capex_cr": 450.0,
+      "year_1_opex_cr": 120.0,
+      "year_2_opex_cr": 90.0,
+      "year_3_opex_cr": 90.0,
+      "three_year_total_cr": 750.0,
+      "data_privacy_level": "High",
+      "risk_profile": "Extreme (high probability of model underperforming frontier)",
+      "time_to_market_months": 18
+    },
+    "Option_B_Public_SaaS_APIs": {
+      "name": "Unmanaged Third-Party Public SaaS APIs",
+      "year_1_capex_cr": 2.0,
+      "year_1_opex_cr": 135.0,
+      "year_2_opex_cr": 155.0,
+      "year_3_opex_cr": 180.0,
+      "three_year_total_cr": 472.0,
+      "data_privacy_level": "Low (Enterprise IP & telemetry shared with external vendor)",
+      "risk_profile": "High (Data sovereignty & regulatory non-compliance)",
+      "time_to_market_months": 2
+    },
+    "Option_C_Private_Routed_Platform": {
+      "name": "Private Licensed Inference + Dynamic Model Routing",
+      "year_1_capex_cr": 12.0,
+      "year_1_opex_cr": 28.0,
+      "year_2_opex_cr": 32.0,
+      "year_3_opex_cr": 36.0,
+      "three_year_total_cr": 108.0,
+      "data_privacy_level": "Maximum (100% On-prem / Air-gapped VPC, Zero Data Leakage)",
+      "risk_profile": "Low (Proven frontier weights + SLA isolation)",
+      "time_to_market_months": 3
+    }
+  },
+  "business_roi": {
+    "annual_infrastructure_savings_cr": 82.5,
+    "three_year_savings_cr": 247.5,
+    "annual_platform_revenue_cr": 135.0,
+    "projected_three_year_net_value_cr": 544.5,
+    "roi_multiple_on_consulting_fee": 113.4
+  }
+}

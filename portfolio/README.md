@@ -26,15 +26,45 @@ Unlike typical bootcamp notebooks or basic UI wrappers, every repository in this
 
 | Repository / Project | Focus Area | Core Technologies | Key Empirical Receipts | Live Demos & Code |
 | :--- | :--- | :--- | :--- | :--- |
-| **[1. Customer Support Quantized LLM Agent](./Customer-Support-Automation-Quantized-LLM-Agentic-Workflow)** | **LLM Optimization & Cost Engineering** | 4-bit NF4 Quantization, bitsandbytes, Hybrid Search (BM25 + Dense RRF), FastAPI SSE | ⚡ **96.67% Cost Reduction**<br>💾 **65% VRAM Reduction** (14.5GB → 5.1GB)<br>🛡️ **0.9412 Guardrail F1** | [![Space](https://img.shields.io/badge/Demo-HuggingFace%20Space-blue)](https://huggingface.co/spaces/ashrafksalim/customer-support-quantized-llm-agent) [![Colab](https://img.shields.io/badge/Colab-Interactive%20Notebook-orange)](https://colab.research.google.com/drive/1RIf9_bZAoqmB9rq6nNWciNmaSPZJSpOx?usp=sharing) |
-| **[2. Contract Risk Review & Reasoning](./LLM-Fine-Tuning-Agentic-Reasoning-for-Contract-Risk-Review)** | **Domain Fine-Tuning & Legal AI** | LoRA / PEFT Adapters, DeBERTa-v3 / Qwen2.5, LEDGAR Dataset, ChromaDB RAG | 🎯 **High-precision Clause Risk Extraction**<br>🔍 **Precedent Case Grounding**<br>⚖️ **Fairness & Bias Audited** | [![Notebook](https://img.shields.io/badge/Code-LoRA%20Pipeline-green)](./LLM-Fine-Tuning-Agentic-Reasoning-for-Contract-Risk-Review) |
-| **[3. Quantum Hardware Benchmarking Suite](./Quantum-Hardware-Validation-Benchmarking-Suite)** | **Scientific Computing & Systems Eval** | Quantum Circuit Simulation, Hardware Noise Modeling, Error Mitigation | 🔬 **Hardware-Agnostic Validation**<br>📊 **Fidelity & Error Benchmarking**<br>📈 **Algorithmic Profiling** | [![Notebook](https://img.shields.io/badge/Code-Benchmarking%20Suite-purple)](./Quantum-Hardware-Validation-Benchmarking-Suite) |
+| **[1. Enterprise GenAI Platform & Capacity Architecture](./Enterprise-GenAI-Platform-Capacity-Architecture)** | **Staff AI Architecture & Lead FDE Systems** | Multi-Tenant `/v1/chat` Gateway, Bot Registry, Dynamic SLM/Frontier Router, GPU Capacity Math (10K→1M Concurrency), FinOps TCO | 💰 **₹70–90 Cr/yr Infra Savings**<br>🚀 **₹120–150 Cr Platform Run-Rate**<br>⚡ **<1s P95 TTFT, <3.5s E2E** | [![Code](https://img.shields.io/badge/Architecture-Control%20Plane-009688)](./Enterprise-GenAI-Platform-Capacity-Architecture) [![Docs](https://img.shields.io/badge/Docs-Capacity%20Plan-blue)](./Enterprise-GenAI-Platform-Capacity-Architecture/docs) |
+| **[2. Customer Support Quantized LLM Agent](./Customer-Support-Automation-Quantized-LLM-Agentic-Workflow)** | **LLM Optimization & Cost Engineering** | 4-bit NF4 Quantization, bitsandbytes, Hybrid Search (BM25 + Dense RRF), FastAPI SSE | ⚡ **96.67% Cost Reduction**<br>💾 **65% VRAM Reduction** (14.5GB → 5.1GB)<br>🛡️ **0.9412 Guardrail F1** | [![Space](https://img.shields.io/badge/Demo-HuggingFace%20Space-blue)](https://huggingface.co/spaces/ashrafksalim/customer-support-quantized-llm-agent) [![Colab](https://img.shields.io/badge/Colab-Interactive%20Notebook-orange)](https://colab.research.google.com/drive/1RIf9_bZAoqmB9rq6nNWciNmaSPZJSpOx?usp=sharing) |
+| **[3. Contract Risk Review & Reasoning](./LLM-Fine-Tuning-Agentic-Reasoning-for-Contract-Risk-Review)** | **Domain Fine-Tuning & Legal AI** | LoRA / PEFT Adapters, DeBERTa-v3 / Qwen2.5, LEDGAR Dataset, ChromaDB RAG | 🎯 **High-precision Clause Risk Extraction**<br>🔍 **Precedent Case Grounding**<br>⚖️ **Fairness & Bias Audited** | [![Notebook](https://img.shields.io/badge/Code-LoRA%20Pipeline-green)](./LLM-Fine-Tuning-Agentic-Reasoning-for-Contract-Risk-Review) |
+| **[4. Quantum Hardware Benchmarking Suite](./Quantum-Hardware-Validation-Benchmarking-Suite)** | **Scientific Computing & Systems Eval** | Quantum Circuit Simulation, Hardware Noise Modeling, Error Mitigation | 🔬 **Hardware-Agnostic Validation**<br>📊 **Fidelity & Error Benchmarking**<br>📈 **Algorithmic Profiling** | [![Notebook](https://img.shields.io/badge/Code-Benchmarking%20Suite-purple)](./Quantum-Hardware-Validation-Benchmarking-Suite) |
 
 ---
 
 ## 🏛️ Deep Dive: Project Highlights
 
-### 1. Customer Support Automation — Quantized LLM + Agentic Workflow
+### 1. Enterprise Multi-Tenant GenAI Platform & Capacity Architecture
+* **Repository**: [`Enterprise-GenAI-Platform-Capacity-Architecture`](./Enterprise-GenAI-Platform-Capacity-Architecture)
+* **Problem**: A Tier-1 industrial conglomerate with 10M registered users and 100K DAU faced runaway API expenses, shadow AI tools across subsidiaries, and data leakage risks, risking a ₹500+ Cr misallocation in scratch pretraining.
+* **Architecture & Solution**:
+  - **Unified `/v1/chat` Control Plane & Bot Registry**: Centralized metadata catalog managing 50+ enterprise bots with document-level ACLs and RBAC/ABAC isolation.
+  - **Dynamic Model-Routing Engine**: Routes 70% of low-complexity queries to 8B SLMs and 30% complex analytical reasoning to Claude-X / 70B frontier models.
+  - **First-Principles GPU Capacity Plan**: Mathematical derivation of VRAM, KV-cache, continuous batching, and Tensor Parallelism (TP=2) for 10K $\rightarrow$ 1M concurrency ($<1$s P95 TTFT, $<3.5$s P95 E2E).
+  - **Zero-Trust Tool Plane**: Air-gapped ERP/CRM tool execution with transactional Human-in-the-Loop gates for state modifications.
+* **Empirical Receipts**:
+  - **₹70–90 Cr Annual Infrastructure Cost Avoidance** modeled via private inference + routing.
+  - **₹120–150 Cr Annualized Platform Revenue** unlocked across enterprise subscriptions.
+  - **113.4x ROI** delivered on architecture engagement fee.
+
+```
+[ Enterprise Request ] ──► [ WAF / IAM Gateway ] ──► [ Injection & PII Firewall ]
+                                                            │
+                                                            ▼
+                                             [ Dynamic Model Router ]
+                                              │                    │
+                          (70% Low Complexity)▼                    ▼ (30% Deep Reasoning)
+                              [ 8B SLM Cluster ]             [ Claude-X 70B Cluster (TP=2) ]
+                                      │                              │
+                                      └──────────────┬───────────────┘
+                                                     ▼
+                                      [ Hybrid RAG + Air-Gapped Tool Plane ]
+```
+
+---
+
+### 2. Customer Support Automation — Quantized LLM + Agentic Workflow
 * **Repository**: [`Customer-Support-Automation-Quantized-LLM-Agentic-Workflow`](./Customer-Support-Automation-Quantized-LLM-Agentic-Workflow)
 * **Problem**: High inference costs and latency SLAs when deploying 7B+ LLMs for high-volume tier-1 customer tickets, coupled with safety risks on billing disputes and prompt injection.
 * **Architecture & Solution**:
