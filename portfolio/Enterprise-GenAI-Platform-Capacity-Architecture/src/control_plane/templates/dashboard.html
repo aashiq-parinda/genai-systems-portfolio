@@ -277,7 +277,34 @@
         </div>
 
         <div class="card">
-            <div class="panel-title">Active Bot Registry Policies</div>
+            <div class="panel-title">
+                <span>Enterprise Tenant Cost & Lifecycle Controls</span>
+                <span style="font-size: 11px; color: var(--text-dim); font-weight: normal;">Live Spend Meter</span>
+            </div>
+            
+            <div class="bot-row" id="tenant-row-hq">
+                <div>
+                    <div class="bot-name">Conglomerate HQ (Payroll/HR)</div>
+                    <div style="font-size: 11px; color: var(--text-dim); margin-top:2px;">
+                        Spend: <span id="spend-hq" style="color: var(--accent-green); font-weight: 600;">$1,240.50</span> / $5,000.00
+                        <span id="badge-hq" style="margin-left: 8px; color: var(--accent-green);">● ACTIVE</span>
+                    </div>
+                </div>
+                <button class="btn" id="btn-hq" style="background: rgba(255, 51, 102, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red);" onclick="toggleTenant('hq')">SHUTDOWN</button>
+            </div>
+
+            <div class="bot-row" id="tenant-row-steel">
+                <div>
+                    <div class="bot-name">Steel Manufacturing (Turbines)</div>
+                    <div style="font-size: 11px; color: var(--text-dim); margin-top:2px;">
+                        Spend: <span id="spend-steel" style="color: var(--accent-cyan); font-weight: 600;">$4,890.20</span> / $12,000.00
+                        <span id="badge-steel" style="margin-left: 8px; color: var(--accent-green);">● ACTIVE</span>
+                    </div>
+                </div>
+                <button class="btn" id="btn-steel" style="background: rgba(255, 51, 102, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red);" onclick="toggleTenant('steel')">SHUTDOWN</button>
+            </div>
+
+            <div class="panel-title" style="margin-top: 18px;">Active Bot Registry Policies</div>
             <div class="bot-row">
                 <div>
                     <div class="bot-name">Corporate HR & Payroll Assistant</div>
@@ -296,7 +323,7 @@
             <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-card);">
                 <div class="card-label">Observability Endpoints</div>
                 <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); display: flex; flex-direction: column; gap: 6px;">
-                    <div>• <a href="/health" style="color: var(--accent-cyan); text-decoration: none;">/health</a> - Liveness & Worker Probes</div>
+                    <div>• <a href="/v1/tenants" style="color: var(--accent-cyan); text-decoration: none;">/v1/tenants</a> - List Tenants, Statuses & Budgets</div>
                     <div>• <a href="/v1/cache/stats" style="color: var(--accent-cyan); text-decoration: none;">/v1/cache/stats</a> - Prefix KV-Cache Metrics</div>
                     <div>• <a href="/docs" style="color: var(--accent-cyan); text-decoration: none;">/docs</a> - Swagger OpenAPI Specifications</div>
                 </div>
@@ -333,6 +360,46 @@
                 ${cacheBadge}
             `;
             feed.prepend(div);
+        }
+
+        // Interactive Tenant Shutdown / Reactivation Logic
+        const tenantStates = { hq: 'ACTIVE', steel: 'ACTIVE' };
+
+        function toggleTenant(key) {
+            const btn = document.getElementById(`btn-${key}`);
+            const badge = document.getElementById(`badge-${key}`);
+            const isCurrentlyActive = tenantStates[key] === 'ACTIVE';
+
+            if (isCurrentlyActive) {
+                tenantStates[key] = 'SHUTDOWN';
+                btn.textContent = 'REACTIVATE';
+                btn.style.background = 'rgba(0, 255, 136, 0.2)';
+                btn.style.color = 'var(--accent-green)';
+                btn.style.borderColor = 'var(--accent-green)';
+                badge.textContent = '✕ SHUTDOWN';
+                badge.style.color = 'var(--accent-red)';
+                
+                // Add alert in event feed
+                const feed = document.getElementById('feed');
+                const div = document.createElement('div');
+                div.className = 'log-entry';
+                div.innerHTML = `<span class="log-time">[${new Date().toTimeString().split(' ')[0]}]</span> <span class="log-guardrail">[TENANT ISOLATION]</span> Tenant <span style="color:#fff;">tenant_${key}</span> manually SHUTDOWN. All inference blocked immediately.`;
+                feed.prepend(div);
+            } else {
+                tenantStates[key] = 'ACTIVE';
+                btn.textContent = 'SHUTDOWN';
+                btn.style.background = 'rgba(255, 51, 102, 0.2)';
+                btn.style.color = 'var(--accent-red)';
+                btn.style.borderColor = 'var(--accent-red)';
+                badge.textContent = '● ACTIVE';
+                badge.style.color = 'var(--accent-green)';
+
+                const feed = document.getElementById('feed');
+                const div = document.createElement('div');
+                div.className = 'log-entry';
+                div.innerHTML = `<span class="log-time">[${new Date().toTimeString().split(' ')[0]}]</span> <span class="log-hit">[TENANT RESTORED]</span> Tenant <span style="color:#fff;">tenant_${key}</span> re-activated. GPU pool allocation online.`;
+                feed.prepend(div);
+            }
         }
 
         // Periodic telemetry pulse

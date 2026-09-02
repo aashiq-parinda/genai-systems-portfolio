@@ -110,3 +110,47 @@ def test_gateway_tool_execution_with_approval_gate(client):
     response = client.post("/v1/tools/execute", json=payload, headers=headers)
     assert response.status_code == 403
     assert response.json()["requires_confirmation"] is True
+
+
+def test_gateway_tenant_lifecycle_and_cost(client):
+    admin_headers = {
+        "x-tenant-id": "tenant_steel_manufacturing",
+        "x-user-role": "admin",
+        "Authorization": "Bearer admin_jwt_token_999"
+    }
+
+    # 1. Fetch current tenant cost and quota
+    cost_res = client.get("/v1/tenants/tenant_steel_manufacturing/cost", headers=admin_headers)
+    assert cost_res.status_code == 200
+    assert cost_res.json()["status"] == "ACTIVE"
+    assert cost_res.json()["current_spend_usd"] > 0
+    assert cost_res.json()["budget_utilization_pct"] > 0
+
+    # 2. Shut down tenant
+    shutdown_res = client.post(
+        "/v1/tenants/tenant_steel_manufacturing/lifecycle",
+        json={"action": "SHUTDOWN", "reason": "Monthly budget overrun"},
+        headers=admin_headers
+    )
+    assert shutdown_res.status_code == 200
+    assert shutdown_res.json()["new_status"] == "SHUTDOWN"
+
+    # 3. Verify that requests from this tenant are now blocked
+    chat_payload = {
+        "bot_id": "bot_industrial_maintenance",
+        "messages": [{"role": "user", "content": "Check part inventory."}],
+        "stream": False
+    }
+    blocked_res = client.post("/v1/chat/completions", json=chat_payload, headers=admin_headers)
+    assert blocked_res.status_code == 403
+    assert "currently SHUTDOWN" in blocked_res.json()["detail"]
+
+    # 4. Re-activate tenant
+    activate_res = client.post(
+        "/v1/tenants/tenant_steel_manufacturing/lifecycle",
+        json={"action": "ACTIVATE"},
+        headers=admin_headers
+    )
+    assert activate_res.status_code == 200
+    assert activate_res.json()["new_status"] == "ACTIVE"
+

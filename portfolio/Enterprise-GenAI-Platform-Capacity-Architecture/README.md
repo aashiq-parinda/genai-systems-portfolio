@@ -145,12 +145,46 @@ uvicorn src.control_plane.gateway:app --reload --port 8000
 python src/cli.py size-cluster --model Claude-X-Frontier-70B --gpu NVIDIA-H100-SXM-80GB --concurrency 10000 --precision fp8
 ```
 
-### 3. Run FinOps 3-Year TCO Simulator
+### 4. Run FinOps 3-Year TCO Simulator
 ```bash
 python src/cli.py run-tco --fee-cr 4.80
 ```
 
-### 4. Run Full Test Suite
+### 5. ⚡ Single-Line Admin & FinOps Control Commands
+
+#### A. Instant Tenant Shutdown (Emergency Kill-Switch & Budget Quarantine)
+```bash
+# Instantly SHUT DOWN a subsidiary tenant (blocks inference traffic immediately)
+curl -X POST http://localhost:8000/v1/tenants/tenant_steel_manufacturing/lifecycle \
+  -H "Authorization: Bearer mock-jwt-token" -H "X-Tenant-ID: tenant_steel_manufacturing" -H "X-User-Role: admin" \
+  -H "Content-Type: application/json" -d '{"action": "SHUTDOWN", "reason": "Monthly budget cap exceeded"}'
+
+# Re-activate a suspended/shutdown tenant
+curl -X POST http://localhost:8000/v1/tenants/tenant_steel_manufacturing/lifecycle \
+  -H "Authorization: Bearer mock-jwt-token" -H "X-Tenant-ID: tenant_steel_manufacturing" -H "X-User-Role: admin" \
+  -H "Content-Type: application/json" -d '{"action": "ACTIVATE"}'
+```
+
+#### B. Real-Time Tenant Spend & Budget Metering
+```bash
+# Check accumulated spend and quota consumption for a specific tenant
+curl http://localhost:8000/v1/tenants/tenant_steel_manufacturing/cost \
+  -H "Authorization: Bearer mock-jwt-token" -H "X-Tenant-ID: tenant_steel_manufacturing"
+```
+
+#### C. Cloud Infrastructure Scale-Down & Teardown (IaaS)
+```bash
+# Scale down GPU worker nodes to 0 replicas (stop GPU cloud burning during off-hours)
+kubectl scale deployment/vllm-slm-serving --replicas=0
+
+# Scale down Gateway replicas
+kubectl scale deployment/enterprise-genai-gateway --replicas=1
+
+# Complete cloud environment teardown (Terraform destroy)
+cd infra/terraform && terraform destroy -auto-approve
+```
+
+### 6. Run Full Test Suite
 ```bash
 pytest tests/ -v
 ```

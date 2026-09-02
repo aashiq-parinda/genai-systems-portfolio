@@ -28,6 +28,27 @@ app = FastAPI(
 )
 
 # In-memory storage for Bot Registry and Tenant Configurations
+TENANT_REGISTRY: Dict[str, Dict[str, Any]] = {
+    "tenant_conglomerate_hq": {
+        "tenant_id": "tenant_conglomerate_hq",
+        "name": "Conglomerate Corporate HQ",
+        "status": "ACTIVE",  # ACTIVE | SUSPENDED | SHUTDOWN
+        "monthly_budget_usd": 5000.0,
+        "current_spend_usd": 1240.50,
+        "active_gpu_pool": "slm-8b-gpu-pool",
+        "requests_processed": 142380,
+    },
+    "tenant_steel_manufacturing": {
+        "tenant_id": "tenant_steel_manufacturing",
+        "name": "Heavy Steel Manufacturing Division",
+        "status": "ACTIVE",
+        "monthly_budget_usd": 12000.0,
+        "current_spend_usd": 4890.20,
+        "active_gpu_pool": "frontier-70b-gpu-pool",
+        "requests_processed": 89450,
+    }
+}
+
 BOT_REGISTRY: Dict[str, Dict[str, Any]] = {
     "bot_hr_payroll": {
         "bot_id": "bot_hr_payroll",
@@ -164,9 +185,24 @@ async def chat_completions(
         )
 
     bot = BOT_REGISTRY[req.bot_id]
+    tenant_id = auth["tenant_id"]
     
-    # 1. Tenant & RBAC Isolation Check
-    if bot["tenant_id"] != auth["tenant_id"]:
+    # 1. Tenant Lifecycle & Operational Status Check
+    if tenant_id in TENANT_REGISTRY:
+        t_meta = TENANT_REGISTRY[tenant_id]
+        if t_meta.get("status") in ["SHUTDOWN", "SUSPENDED"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Tenant '{tenant_id}' is currently {t_meta.get('status')}. Requests blocked."
+            )
+        if t_meta.get("current_spend_usd", 0) >= t_meta.get("monthly_budget_usd", float("inf")):
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Tenant '{tenant_id}' has exceeded monthly spend quota (${t_meta.get('monthly_budget_usd')})."
+            )
+
+    # 2. Tenant & RBAC Isolation Check
+    if bot["tenant_id"] != tenant_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied: Bot belongs to a different enterprise tenant."
@@ -330,3 +366,87 @@ def execute_tool(req: ToolExecutionRequest, auth: Dict[str, str] = Depends(verif
         "tool_name": req.tool_name,
         "result": {"message": f"Successfully invoked {req.tool_name} with air-gapped IAM credentials."}
     }
+
+
+# ==============================================================================
+# Tenant Lifecycle, Cost & Cloud Resource Governance Endpoints
+# ==============================================================================
+
+@app.get("/v1/tenants")
+def list_tenants(auth: Dict[str, str] = Depends(verify_tenant_auth)):
+    """List all registered enterprise tenants, statuses, and monthly spend."""
+    if auth["user_role"] not in ["admin", "ai_platform_engineer"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tenant administration requires admin privileges."
+        )
+    return {"tenants": list(TENANT_REGISTRY.values())}
+
+
+@app.get("/v1/tenants/{tenant_id}/cost")
+def get_tenant_cost(tenant_id: str, auth: Dict[str, str] = Depends(verify_tenant_auth)):
+    """Retrieve realtime accumulated inference spend, budget, and GPU allocation for a tenant."""
+    if tenant_id not in TENANT_REGISTRY:
+        raise HTTPException(status_code=404, detail=f"Tenant '{tenant_id}' not found.")
+    
+    t = TENANT_REGISTRY[tenant_id]
+    utilization_pct = round((t["current_spend_usd"] / t["monthly_budget_usd"]) * 100, 2)
+    return {
+        "tenant_id": tenant_id,
+        "name": t["name"],
+        "status": t["status"],
+        "active_gpu_pool": t["active_gpu_pool"],
+        "current_spend_usd": t["current_spend_usd"],
+        "monthly_budget_usd": t["monthly_budget_usd"],
+        "budget_utilization_pct": utilization_pct,
+        "requests_processed": t["requests_processed"],
+    }
+
+
+class TenantStatusUpdateRequest(BaseModel):
+    action: str = Field(..., description="Action: 'SHUTDOWN' | 'SUSPEND' | 'ACTIVATE'")
+    reason: Optional[str] = "Admin manual override"
+
+
+@app.post("/v1/tenants/{tenant_id}/lifecycle")
+def manage_tenant_lifecycle(
+    tenant_id: str,
+    req: TenantStatusUpdateRequest,
+    auth: Dict[str, str] = Depends(verify_tenant_auth)
+):
+    """Admin command to instantly SHUTDOWN, SUSPEND, or ACTIVATE a specific tenant.
+    
+    - SHUTDOWN: Immediately drops all active inference streams and blocks future calls.
+    - SUSPEND: Temporarily pauses tenant due to budget overrun or security quarantine.
+    - ACTIVATE: Restores full multi-tenant access and GPU pool allocation.
+    """
+    if auth["user_role"] not in ["admin", "ai_platform_engineer"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Lifecycle modifications require platform admin privileges."
+        )
+    if tenant_id not in TENANT_REGISTRY:
+        raise HTTPException(status_code=404, detail=f"Tenant '{tenant_id}' not found.")
+
+    action_map = {
+        "SHUTDOWN": "SHUTDOWN",
+        "SUSPEND": "SUSPENDED",
+        "ACTIVATE": "ACTIVE"
+    }
+    new_status = action_map.get(req.action.upper())
+    if not new_status:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid action. Must be 'SHUTDOWN', 'SUSPEND', or 'ACTIVATE'."
+        )
+
+    TENANT_REGISTRY[tenant_id]["status"] = new_status
+    return {
+        "status": "success",
+        "tenant_id": tenant_id,
+        "new_status": new_status,
+        "reason": req.reason,
+        "timestamp": time.time(),
+        "message": f"Tenant '{tenant_id}' transitioned to {new_status}. All gateway traffic policies updated."
+    }
+
