@@ -17,6 +17,14 @@
 
 ---
 
+## 📺 Systems Architecture & Live Demo Walkthrough
+
+[![Watch the Systems Portfolio Walkthrough](https://img.youtube.com/vi/YOUR_YOUTUBE_VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=YOUR_YOUTUBE_VIDEO_ID)
+
+> 💡 *Click the thumbnail above to watch the video walkthrough demonstrating the Enterprise AI Platform control plane, Quantized Agentic workflow, Legal LoRA fine-tuning, and Quantum Simulator.*
+
+---
+
 ## 🎯 Engineering Focus & Standards
 
 Unlike typical bootcamp notebooks or basic UI wrappers, every repository in this portfolio is engineered against **MAANG production standards**:

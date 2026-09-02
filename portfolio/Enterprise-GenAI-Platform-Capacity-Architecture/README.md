@@ -10,6 +10,14 @@
 
 ---
 
+## 📺 Video Walkthrough & Architecture Demo
+
+[![Watch the Video Walkthrough](https://img.youtube.com/vi/YOUR_YOUTUBE_VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=YOUR_YOUTUBE_VIDEO_ID)
+
+> 💡 *Click the thumbnail above to watch the end-to-end system architecture walkthrough, control plane live demo, and GPU capacity planning derivation on YouTube.*
+
+---
+
 ## 🏛️ Executive Summary & Case Study Context
 
 * **Client Profile**: Fictional Tier-1 Industrial Conglomerate (Steel, Energy, Infrastructure, Consumer Services) partnering with Frontier Model Providers.
