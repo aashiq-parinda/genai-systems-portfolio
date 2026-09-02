@@ -1,0 +1,53 @@
+{
+  "benchmark_metadata": {
+    "timestamp": "2026-08-27 15:13:03 UTC",
+    "dataset_size": 16,
+    "iterations": 5,
+    "total_inferences": 160
+  },
+  "comparative_metrics": {
+    "4-bit Quantized (NF4)": {
+      "latency": {
+        "p50_ms": 0.04,
+        "p90_ms": 6.53,
+        "p95_ms": 6.56,
+        "p99_ms": 6.64,
+        "mean_ms": 2.83,
+        "std_dev_ms": 3.21
+      },
+      "throughput_tokens_sec": 38007.77,
+      "total_tokens_processed": 8625,
+      "cost_per_1000_tickets_usd": 0.0297,
+      "classification_accuracy_pct": 93.75,
+      "guardrail_precision_pct": 88.89,
+      "guardrail_recall_pct": 100.0,
+      "guardrail_f1_score": 0.9412,
+      "vram_memory_gb": 5.09,
+      "vram_reduction_pct": 65.02
+    },
+    "FP16 Full Precision": {
+      "latency": {
+        "p50_ms": 0.1,
+        "p90_ms": 50.61,
+        "p95_ms": 50.73,
+        "p99_ms": 51.1,
+        "mean_ms": 21.74,
+        "std_dev_ms": 24.76
+      },
+      "throughput_tokens_sec": 4955.27,
+      "total_tokens_processed": 8625,
+      "cost_per_1000_tickets_usd": 0.8921,
+      "classification_accuracy_pct": 93.75,
+      "guardrail_precision_pct": 88.89,
+      "guardrail_recall_pct": 100.0,
+      "guardrail_f1_score": 0.9412,
+      "vram_memory_gb": 14.54,
+      "vram_reduction_pct": 0.0
+    }
+  },
+  "efficiency_deltas": {
+    "cost_reduction_pct": 96.67,
+    "latency_speedup_x": 7.68,
+    "vram_savings_gb": 9.45
+  }
+}

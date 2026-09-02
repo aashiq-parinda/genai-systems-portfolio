@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-08-27 15:20:17 UTC",
+  "model_architecture": "DeBERTa-v3-small + LoRA (r=16, alpha=32)",
+  "eval_summary": {
+    "total_inferences": 40,
+    "overall_category_accuracy_pct": 100.0,
+    "risk_tier_accuracy_pct": 100.0,
+    "macro_f1": 1.0
+  },
+  "latency_profile_ms": {
+    "mean_ms": 0.12,
+    "p50_ms": 0.04,
+    "p95_ms": 0.54
+  },
+  "per_category_fairness": {
+    "Indemnification": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "Limitation of Liability": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "Termination": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "Governing Law": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "Confidentiality": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "Intellectual Property": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "Miscellaneous": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    },
+    "Severability": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0
+    }
+  }
+}
