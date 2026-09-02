@@ -3,7 +3,7 @@
 > 🎯 **Target Roles**: GenAI Application Engineer | Applied AI Scientist | GenAI Infrastructure & MLOps Engineer | Lead / Principal AI Architect  
 > 🏷️ **Seniority Levels**: 🌱 Junior / Entry-Level (L3/E3) | 🥉 Mid-Level (L4/E4) | 🥈 Senior (L5/E5) | 🥇 Staff / Principal (L6+/E6+)  
 > 🏢 **Target Companies**: Meta | Google (DeepMind/GCP) | Amazon (AWS/Bedrock) | Apple | Netflix | OpenAI  
-> 📌 **Repository**: [Cracking The GenAI Portfolio](README.md) | [GenAI Glossary Cheat Sheet](GENAI_GLOSSARY_CHEATSHEET.md)  
+> 📌 **Companion Artifacts**: [Portfolio README](README.md) | [GenAI Glossary Cheat Sheet](GENAI_GLOSSARY_CHEATSHEET.md) | [🧪 Core Algorithms Masterclass Notebook](notebooks/GenAI_Core_Algorithms_And_Evaluation_Masterclass.ipynb) | [⚡ Nano-Transformer (Micro-LLM) Notebook](notebooks/Nano_Transformer_Micro_LLM_From_Scratch.ipynb)  
 
 ---
 
