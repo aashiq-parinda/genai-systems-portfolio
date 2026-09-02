@@ -267,7 +267,7 @@ $$A_i = \frac{r_i - \text{mean}(r)}{\text{std}(r)}$$
 * ⚡ **1-Sentence Definition**: An algorithm that combines search results from multiple search retrieval systems (e.g., BM25 keyword + Dense Vector search) without score normalization.
 * 🧠 **MAANG Systems Mechanics**: Computes unified document rank score using position reciprocal formula:
 
-$$RRF\_Score(d) = \sum_{m \in M} \frac{1}{k + r_m(d)}$$
+$$\text{RRF}(d) = \sum_{m \in M} \frac{1}{k + r_m(d)}$$
 
 where $k = 60$.
 * 💡 **Interview Gotcha**: RRF eliminates the need to calibrate arbitrary distance metrics (e.g., BM25 un-bounded scores vs Cosine similarity $[-1, 1]$).

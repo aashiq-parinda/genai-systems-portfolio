@@ -27,7 +27,7 @@ flowchart LR
 ### Reciprocal Rank Fusion (RRF) Formula
 To combine sparse lexical matches (exact part numbers, serial codes, employee IDs) with dense semantic embeddings without scale sensitivity:
 
-$$\text{RRF\_Score}(d) = \sum_{m \in \{\text{Dense}, \text{BM25}\}} \frac{1}{k + r_m(d)}$$
+$$\text{RRF}(d) = \sum_{m \in \{\text{Dense}, \text{BM25}\}} \frac{1}{k + r_m(d)}$$
 
 Where $k = 60$, and $r_m(d)$ is the rank position of document chunk $d$ in system $m$.
 

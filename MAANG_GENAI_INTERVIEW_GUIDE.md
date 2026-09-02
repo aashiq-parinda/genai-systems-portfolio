@@ -14,10 +14,10 @@
 | 🌱 **Junior / Entry-Level (L3)** | Build basic RAG with pure NumPy cosine similarity and `tiktoken` token truncation without relying on black-box frameworks. | $$\text{Sim}(A, B) = \frac{A \cdot B}{\|A\| \|B\|}$$ |
 | 🧠 **AI/ML Fundamentals** | Explain Byte-Pair Encoding (BPE) vocabulary merging and how Softmax temperature $T$ flattens/sharpens logit probabilities. | $$P(y_i) = \frac{\exp(z_i / T)}{\sum_j \exp(z_j / T)}$$ |
 | 🤖 **GenAI App Engineer** | Don't just suggest `LangChain`. Build concurrent hybrid RAG (BM25 + Dense RRF) and stream tokens via SSE to keep TTFT < 200ms. | $$RRF = \sum \frac{1}{60 + \text{rank}}$$ |
-| 🔬 **Applied AI Scientist** | Derive LoRA ($W_0 + \frac{\alpha}{r}BA$) and DPO implicit loss from scratch; explain why DPO drops the PPO reward model & critic. | $$\mathcal{L}\_{\text{DPO}} = -\log \sigma \left(\beta \log \frac{\pi\_{\theta}}{\pi\_{\text{ref}}}\right)$$ |
+| 🔬 **Applied AI Scientist** | Derive LoRA ($W_0 + \frac{\alpha}{r}BA$) and DPO implicit loss from scratch; explain why DPO drops the PPO reward model & critic. | $$\mathcal{L}_{\text{DPO}} = -\log \sigma \left(\beta \log \frac{\pi_{\theta}}{\pi_{\text{ref}}}\right)$$ |
 | ⚡ **GenAI Infra / MLOps** | Explain how PagedAttention cuts KV cache waste from 60% → 4% and why FP8 Tensor Cores give 2x GEMM speed over FP16 on H100s. | $$\text{VRAM} = \frac{P \times b}{\text{Quant}} + \text{KV Cache}$$ |
 | 🏛️ **Lead / Staff Architect** | Design multi-tier model cascades: route 60% queries to local 2B SLMs ($0.00005/req) to keep total cost < $0.001/query. | $$\text{Cost} = \sum c(m_i) P(m_i)$$ |
-| 🛡️ **AI Safety & Security** | Mitigate indirect prompt injection in RAG via structural context tags (`<context>`), pre-filtered vector RBAC ACL masks, and Presidio PII DLP. | $$\text{Filter: } \text{tenant}\_{\text{id}} = T\_{\text{req}}$$ |
+| 🛡️ **AI Safety & Security** | Mitigate indirect prompt injection in RAG via structural context tags (`<context>`), pre-filtered vector RBAC ACL masks, and Presidio PII DLP. | $$\text{Filter: } \text{tenant}_{\text{id}} = T_{\text{req}}$$ |
 
 ---
 
@@ -358,7 +358,7 @@ print("T=2.0 (Flat/Creative):     ", softmax_with_temperature(logits, temperatur
 #### 📐 Reciprocal Rank Fusion (RRF) Formula
 Combining BM25 keyword matching with Dense Vector Cosine Similarity:
 
-$$RRF\_Score(d \in D) = \sum_{m \in M} \frac{1}{k + r_m(d)}$$
+$$\text{RRF}(d \in D) = \sum_{m \in M} \frac{1}{k + r_m(d)}$$
 where $k = 60$, $M$ is search systems (BM25, Dense), and $r_m(d)$ is document rank.
 
 #### 💻 Concurrent Hybrid RAG Code Implementation
