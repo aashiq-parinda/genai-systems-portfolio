@@ -18,6 +18,7 @@ import time
 
 from .guardrails import EnterpriseGuardrails
 from .router import DynamicModelRouter
+from .context_cache import ContextCacheManager
 
 app = FastAPI(
     title="Enterprise GenAI Multi-Tenant Control Plane",
@@ -53,6 +54,7 @@ BOT_REGISTRY: Dict[str, Dict[str, Any]] = {
 
 guardrails = EnterpriseGuardrails()
 router = DynamicModelRouter()
+cache_manager = ContextCacheManager()
 
 
 # Pydantic Schemas
@@ -174,14 +176,29 @@ async def chat_completions(
             }
         )
 
-    # 4. Model Routing
+    # 4. Prefix KV-Cache Lookup — check if this bot's system prompt is cached
+    bot_system_prompt = bot.get("name", "") + " " + " ".join(bot.get("knowledge_bases", []))
+    cache_result = cache_manager.get_or_create_prefix_entry(
+        model_name=bot.get("model_policy", "dynamic_routed"),
+        system_prompt=bot_system_prompt,
+    )
+    cache_metadata = {
+        "layer1_semantic": "MISS",  # Redis semantic cache (external)
+        "layer2_prefix": "HIT" if cache_result.hit else "MISS",
+        "prefix_tokens_saved": cache_result.tokens_saved,
+        "estimated_cost_saved_usd": cache_result.cost_saved_usd,
+        "layer3_handoff_active": False,
+    }
+
+    # 5. Model Routing
     force_frontier = (bot["model_policy"] == "force_frontier")
     route_decision = router.route_request(user_message, force_frontier=force_frontier)
 
-    # 5. Handle Streaming Response (SSE)
+    # 6. Handle Streaming Response (SSE)
     if req.stream:
         async def event_generator():
-            yield f"data: {json.dumps({'type': 'routing', 'decision': route_decision.selected_model, 'tier': route_decision.tier})}\n\n"
+            # Emit routing + cache metadata as the first SSE frame
+            yield f"data: {json.dumps({'type': 'routing', 'decision': route_decision.selected_model, 'tier': route_decision.tier, 'cache_metadata': cache_metadata})}\n\n"
             sample_tokens = [
                 "Processing ", "enterprise ", "query ", "under ", "air-gapped ",
                 "data ", "isolation ", "policy. ", "Analysis ", "completed ", "successfully."
@@ -194,7 +211,7 @@ async def chat_completions(
                     "choices": [{"delta": {"content": token}, "index": 0, "finish_reason": None}]
                 }
                 yield f"data: {json.dumps(chunk)}\n\n"
-            
+
             yield f"data: {json.dumps({'choices': [{'delta': {}, 'index': 0, 'finish_reason': 'stop'}]})}\n\n"
             yield "data: [DONE]\n\n"
 
@@ -211,6 +228,7 @@ async def chat_completions(
             "reason": route_decision.routing_reason,
             "estimated_cost_usd": route_decision.estimated_cost_usd
         },
+        "cache_metadata": cache_metadata,
         "choices": [{
             "index": 0,
             "message": {
@@ -224,6 +242,49 @@ async def chat_completions(
             "completion_tokens": route_decision.estimated_tokens_completion,
             "total_tokens": route_decision.estimated_tokens_prompt + route_decision.estimated_tokens_completion
         }
+    }
+
+
+
+@app.get("/v1/cache/stats")
+def get_cache_stats(auth: Dict[str, str] = Depends(verify_tenant_auth)):
+    """Return aggregated prefix KV-cache statistics for platform observability."""
+    if auth["user_role"] not in ["admin", "ai_platform_engineer"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cache statistics are only accessible to platform administrators."
+        )
+    return cache_manager.get_cache_stats()
+
+
+@app.delete("/v1/cache/prefixes/{bot_id}")
+def invalidate_bot_prefix_cache(
+    bot_id: str,
+    auth: Dict[str, str] = Depends(verify_tenant_auth)
+):
+    """Manually invalidate the prefix KV-cache for a specific bot.
+
+    Must be called after a bot's system prompt is updated to prevent stale
+    KV-state references from being served to subsequent requests.
+    """
+    if auth["user_role"] not in ["admin", "ai_platform_engineer"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cache invalidation is only accessible to platform administrators."
+        )
+    if bot_id not in BOT_REGISTRY:
+        raise HTTPException(status_code=404, detail=f"Bot '{bot_id}' not found.")
+
+    bot = BOT_REGISTRY[bot_id]
+    bot_system_prompt = bot.get("name", "") + " " + " ".join(bot.get("knowledge_bases", []))
+    invalidated = cache_manager.invalidate_bot(
+        model_name=bot.get("model_policy", "dynamic_routed"),
+        system_prompt=bot_system_prompt,
+    )
+    return {
+        "status": "invalidated" if invalidated else "not_found",
+        "bot_id": bot_id,
+        "message": f"Prefix cache entry {'removed' if invalidated else 'was not present'} for bot '{bot_id}'."
     }
 
 

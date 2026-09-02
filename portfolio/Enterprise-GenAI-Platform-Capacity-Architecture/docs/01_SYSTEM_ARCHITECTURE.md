@@ -49,12 +49,20 @@ graph TD
         F3[Human-in-the-Loop Approval Queue]
     end
 
+    subgraph Context Caching Layer
+        G1[Layer 2: Prefix KV-Cache — SHA-256 system prompt hash]
+        G2[Layer 3: SLM→Frontier Context Handoff Engine]
+    end
+
     A1 & A2 & A3 --> B1
     B1 --> B2 --> B3 --> C1
     C1 --> C2 --> C3 --> C4
     C4 -->|Context Retrieval| D1 --> D2 --> D3 --> D4 --> C4
+    C4 -->|Prefix Cache Lookup| G1
+    G1 -->|KV-State Ref| C4
     C4 -->|70% Workload| E1
     C4 -->|30% Reasoning| E2
+    C4 -->|Escalation Handoff| G2 --> E2
     C4 -->|Live System Tools| F1
     F1 --> F2
     F1 -->|Dangerous Write Ops| F3
@@ -91,3 +99,36 @@ Sending 100% of enterprise queries to frontier reasoning models causes runaway c
 * **GPU Worker Health Probes**: Real-time monitoring of vLLM worker health. Unhealthy worker nodes are evicted within 5 seconds.
 * **Fallback Degradation**: If the Frontier cluster experiences transient saturation or failover, requests automatically degrade to an optimized SLM with explicit warning metadata in the response headers.
 * **$N+1$ Redundancy**: Minimum 1 spare serving replica provisioned per cluster group to guarantee 99.9%+ availability during maintenance and node drains.
+
+---
+
+### 4. Context Caching Layer — Prefix KV-Cache & Cross-Model Handoff
+
+A three-layer caching hierarchy minimises redundant token computation and cross-tier
+escalation costs. Full specification: [`06_CONTEXT_CACHING_STRATEGY.md`](./06_CONTEXT_CACHING_STRATEGY.md).
+
+* **Layer 1 — Semantic Response Cache (Redis)**: Full response deduplication for
+  identical or near-identical enterprise queries. ~15–25% hit rate on FAQ/policy bots.
+* **Layer 2 — Prefix KV-Cache** (`src/control_plane/context_cache.py`): SHA-256 keyed
+  cache of transformer KV-state block references for shared bot system prompts.
+  After the first cold request, subsequent requests skip re-processing the shared prefix
+  (equivalent to Anthropic Prompt Caching / Google Context Caching / vLLM
+  `enable_prefix_caching`). Yields **~90% token cost reduction** on cached prefix tokens.
+* **Layer 3 — Cross-Model Context Handoff**: When the Dynamic Router escalates a
+  multi-turn SLM session to Frontier, the prior conversation history is compressed
+  into a <100-token summary via the `handoff_context()` engine, preventing full cold
+  re-processing of prior turns at frontier token prices.
+
+Every `/v1/chat/completions` response includes observability metadata:
+
+```json
+{
+  "cache_metadata": {
+    "layer1_semantic": "MISS",
+    "layer2_prefix": "HIT",
+    "prefix_tokens_saved": 1800,
+    "estimated_cost_saved_usd": 0.000054,
+    "layer3_handoff_active": false
+  }
+}
+```
