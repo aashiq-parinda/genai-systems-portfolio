@@ -12,7 +12,7 @@
 
 ## 📺 Video Walkthrough & Architecture Demo
 
-[![Watch the Video Walkthrough](https://img.youtube.com/vi/YOUR_YOUTUBE_VIDEO_ID/maxresdefault.jpg)](https://www.youtube.com/watch?v=YOUR_YOUTUBE_VIDEO_ID)
+[![Watch the Video Walkthrough](https://img.youtube.com/vi/2vUcTsUDV38/maxresdefault.jpg)](https://youtu.be/2vUcTsUDV38)
 
 > 💡 *Click the thumbnail above to watch the end-to-end system architecture walkthrough, control plane live demo, and GPU capacity planning derivation on YouTube.*
 
