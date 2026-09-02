@@ -8,9 +8,10 @@ Implements:
 """
 
 from fastapi import FastAPI, HTTPException, Header, Depends, status, Request
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import StreamingResponse, JSONResponse, HTMLResponse
 from pydantic import BaseModel, Field
 from typing import List, Dict, Optional, Any
+from pathlib import Path
 import asyncio
 import json
 import uuid
@@ -107,6 +108,16 @@ def verify_tenant_auth(
 
 
 # Endpoints
+@app.get("/", response_class=HTMLResponse)
+@app.get("/dashboard", response_class=HTMLResponse)
+def get_observability_dashboard():
+    """Live Observability & Control Plane Telemetry UI."""
+    template_path = Path(__file__).parent / "templates" / "dashboard.html"
+    if template_path.exists():
+        return HTMLResponse(content=template_path.read_text(encoding="utf-8"), status_code=200)
+    return HTMLResponse("<h3>Telemetry dashboard template missing.</h3>", status_code=404)
+
+
 @app.get("/health")
 def health_check():
     """Liveness probe."""

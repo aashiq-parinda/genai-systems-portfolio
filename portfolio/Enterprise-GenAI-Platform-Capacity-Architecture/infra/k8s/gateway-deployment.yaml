@@ -1,0 +1,129 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-genai-gateway
+  namespace: default
+  labels:
+    app.kubernetes.io/name: enterprise-genai-gateway
+    app.kubernetes.io/component: control-plane
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: enterprise-genai-gateway
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: enterprise-genai-gateway
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      containers:
+        - name: gateway
+          image: enterprise-genai-gateway:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http
+          resources:
+            requests:
+              cpu: "1000m"
+              memory: "2Gi"
+            limits:
+              cpu: "4000m"
+              memory: "4Gi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: enterprise-genai-gateway-svc
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP
+      name: http
+  selector:
+    app: enterprise-genai-gateway
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: enterprise-genai-gateway-hpa
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: enterprise-genai-gateway
+  minReplicas: 3
+  maxReplicas: 15
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+---
+# Dedicated vLLM GPU Serving Deployment (Tier 1: SLM 8B on NVIDIA L4)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-slm-serving
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vllm-slm-serving
+  template:
+    metadata:
+      labels:
+        app: vllm-slm-serving
+    spec:
+      tolerations:
+        - key: "nvidia.com/gpu"
+          operator: "Exists"
+          effect: "NoSchedule"
+      containers:
+        - name: vllm-engine
+          image: vllm/vllm-openai:latest
+          args: [
+            "--model", "meta-llama/Llama-3-8B-Instruct",
+            "--tensor-parallel-size", "1",
+            "--gpu-memory-utilization", "0.90",
+            "--enable-prefix-caching",
+            "--max-num-seqs", "256",
+            "--port", "8000"
+          ]
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              nvidia.com/gpu: "1"
+              memory: "16Gi"
+            requests:
+              nvidia.com/gpu: "1"
+              memory: "8Gi"

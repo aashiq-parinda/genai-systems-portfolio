@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise GenAI Control Plane & Telemetry Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0a0d14;
+            --bg-card: rgba(16, 22, 34, 0.75);
+            --border-card: rgba(255, 255, 255, 0.08);
+            --accent-cyan: #00e5ff;
+            --accent-green: #00ff88;
+            --accent-purple: #b388ff;
+            --accent-red: #ff3366;
+            --text-main: #f0f4fc;
+            --text-dim: #8fa0bc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 229, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(179, 136, 255, 0.05) 0%, transparent 40%);
+            color: var(--text-main);
+            font-family: 'Outfit', -apple-system, sans-serif;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-card);
+            padding-bottom: 20px;
+            margin-bottom: 28px;
+        }
+
+        .title-block h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 40%, var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .title-block p {
+            color: var(--text-dim);
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .status-badge {
+            background: rgba(0, 255, 136, 0.12);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: var(--accent-green);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-green);
+            box-shadow: 0 0 10px var(--accent-green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-card);
+            border-radius: 12px;
+            padding: 18px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .card:hover {
+            border-color: rgba(0, 229, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .card-label {
+            color: var(--text-dim);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .card-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 26px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .card-sub {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 6px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 960px) {
+            .content-grid { grid-template-columns: 1fr; }
+        }
+
+        .panel-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .feed-box {
+            background: rgba(8, 12, 20, 0.85);
+            border: 1px solid var(--border-card);
+            border-radius: 8px;
+            padding: 12px;
+            height: 340px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+        }
+
+        .log-time { color: var(--text-dim); }
+        .log-slm { color: var(--accent-cyan); font-weight: 600; }
+        .log-frontier { color: var(--accent-purple); font-weight: 600; }
+        .log-hit { color: var(--accent-green); }
+        .log-guardrail { color: var(--accent-red); font-weight: 600; }
+
+        .bot-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.02);
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .bot-name { font-weight: 600; color: #fff; }
+        .bot-policy {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: rgba(0, 229, 255, 0.1);
+            color: var(--accent-cyan);
+        }
+
+        .interactive-section {
+            margin-top: 28px;
+            border-top: 1px solid var(--border-card);
+            padding-top: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--accent-cyan), #0099ff);
+            color: #000;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 12px;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="title-block">
+            <h1>Enterprise GenAI Control Plane & Telemetry</h1>
+            <p>Unified /v1/chat Mesh · Dynamic SLM/Frontier Routing · 3-Layer Prefix KV-Cache</p>
+        </div>
+        <div class="status-badge">
+            <div class="pulse-dot"></div>
+            GATEWAY ONLINE (3 REPLICAS)
+        </div>
+    </div>
+
+    <div class="metrics-grid">
+        <div class="card">
+            <div class="card-label">Active Concurrency</div>
+            <div class="card-val" id="val-concurrency">10,000</div>
+            <div class="card-sub">Peak capacity: 1,000,000 streams</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Prefix KV-Cache Hit Rate</div>
+            <div class="card-val" style="color: var(--accent-green);" id="val-cache-rate">88.4%</div>
+            <div class="card-sub">Layer 2 SHA-256 System Prompt Hashing</div>
+        </div>
+        <div class="card">
+            <div class="card-label">SLM Workload Ratio</div>
+            <div class="card-val" style="color: var(--accent-cyan);" id="val-slm-ratio">71.2%</div>
+            <div class="card-sub">8B FP8 SLM Cluster (<250ms TTFT)</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Monthly Infra Cost Avoidance</div>
+            <div class="card-val" style="color: var(--accent-purple);" id="val-savings">₹6.84 Cr</div>
+            <div class="card-sub">113.4x ROI vs Scratch Pretraining</div>
+        </div>
+    </div>
+
+    <div class="content-grid">
+        <div class="card">
+            <div class="panel-title">
+                <span>Real-Time Request & Routing Stream</span>
+                <button class="btn" onclick="sendSimulatedQuery()">Send Synthetic Query</button>
+            </div>
+            <div class="feed-box" id="feed">
+                <div class="log-entry">
+                    <span class="log-time">[01:45:10]</span> 
+                    <span class="log-slm">[SLM ROUTE]</span> 
+                    Bot: <span style="color:#fff;">bot_hr_payroll</span> | Query: "What is my leave balance?" | 
+                    <span class="log-hit">KV-CACHE HIT (1,800 tokens saved)</span>
+                </div>
+                <div class="log-entry">
+                    <span class="log-time">[01:45:18]</span> 
+                    <span class="log-frontier">[FRONTIER 70B]</span> 
+                    Bot: <span style="color:#fff;">bot_industrial_maintenance</span> | Query: "Diagnose vibration harmonics in Turbine B" | 
+                    Score: 0.85 (Multi-hop Reasoning)
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="panel-title">Active Bot Registry Policies</div>
+            <div class="bot-row">
+                <div>
+                    <div class="bot-name">Corporate HR & Payroll Assistant</div>
+                    <div style="font-size: 11px; color: var(--text-dim); margin-top:2px;">tenant_conglomerate_hq · RBAC: employee</div>
+                </div>
+                <div class="bot-policy">DYNAMIC_ROUTED</div>
+            </div>
+            <div class="bot-row">
+                <div>
+                    <div class="bot-name">Plant Machinery Diagnostic Agent</div>
+                    <div style="font-size: 11px; color: var(--text-dim); margin-top:2px;">tenant_steel_manufacturing · RBAC: plant_engineer</div>
+                </div>
+                <div class="bot-policy" style="color: var(--accent-purple); background: rgba(179, 136, 255, 0.1);">FORCE_FRONTIER</div>
+            </div>
+
+            <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-card);">
+                <div class="card-label">Observability Endpoints</div>
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); display: flex; flex-direction: column; gap: 6px;">
+                    <div>• <a href="/health" style="color: var(--accent-cyan); text-decoration: none;">/health</a> - Liveness & Worker Probes</div>
+                    <div>• <a href="/v1/cache/stats" style="color: var(--accent-cyan); text-decoration: none;">/v1/cache/stats</a> - Prefix KV-Cache Metrics</div>
+                    <div>• <a href="/docs" style="color: var(--accent-cyan); text-decoration: none;">/docs</a> - Swagger OpenAPI Specifications</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const queries = [
+            { query: "Summarize corporate leave entitlement policy", tier: "SLM", hit: true, bot: "bot_hr_payroll" },
+            { query: "Calculate stress tensor and thermal failure in boiler pipe", tier: "FRONTIER", hit: false, bot: "bot_industrial_maintenance" },
+            { query: "Lookup my employee salary slip for August", tier: "SLM", hit: true, bot: "bot_hr_payroll" },
+            { query: "Analyze breach of contract indemnification clause liability", tier: "FRONTIER", hit: false, bot: "bot_hr_payroll" }
+        ];
+
+        function sendSimulatedQuery() {
+            const item = queries[Math.floor(Math.random() * queries.length)];
+            const time = new Date().toTimeString().split(' ')[0];
+            const feed = document.getElementById('feed');
+
+            const div = document.createElement('div');
+            div.className = 'log-entry';
+            const tierBadge = item.tier === 'SLM' 
+                ? `<span class="log-slm">[SLM 8B]</span>` 
+                : `<span class="log-frontier">[FRONTIER 70B]</span>`;
+            const cacheBadge = item.hit 
+                ? `<span class="log-hit">KV-CACHE HIT (1,800 tok saved)</span>` 
+                : `<span style="color:#ffb86c;">KV-CACHE MISS (prefilling)</span>`;
+
+            div.innerHTML = `
+                <span class="log-time">[${time}]</span> 
+                ${tierBadge} 
+                Bot: <span style="color:#fff;">${item.bot}</span> | Query: "${item.query}" | 
+                ${cacheBadge}
+            `;
+            feed.prepend(div);
+        }
+
+        // Periodic telemetry pulse
+        setInterval(() => {
+            const hitRateElem = document.getElementById('val-cache-rate');
+            const current = 88.0 + (Math.random() * 1.5);
+            hitRateElem.textContent = current.toFixed(1) + '%';
+        }, 4000);
+    </script>
+</body>
+</html>
