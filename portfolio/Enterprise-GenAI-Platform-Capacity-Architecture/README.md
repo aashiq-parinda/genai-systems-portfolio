@@ -124,12 +124,23 @@ Option C: Private Routed (Ours)  | [█████]                            
 
 ## ⚡ Quickstart & Interactive CLI
 
-### 1. Install Dependencies
+### 1. Run with Docker (1-Click Local Serving)
 ```bash
-pip install -r requirements.txt
+# Start the Gateway with Docker Compose
+docker compose up --build -d
+
+# Check Gateway Health & Swagger UI
+curl http://localhost:8000/health
+open http://localhost:8000/docs
 ```
 
-### 2. Run GPU Capacity Sizing Calculator
+### 2. Manual Local Setup
+```bash
+pip install -r requirements.txt
+uvicorn src.control_plane.gateway:app --reload --port 8000
+```
+
+### 3. Run GPU Capacity Sizing Calculator
 ```bash
 python src/cli.py size-cluster --model Claude-X-Frontier-70B --gpu NVIDIA-H100-SXM-80GB --concurrency 10000 --precision fp8
 ```

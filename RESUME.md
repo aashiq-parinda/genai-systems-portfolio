@@ -57,7 +57,7 @@ Production-grade **Machine Learning & Generative AI Systems Engineer** with **5+
 * Built MAXX AI Voice Assistant with custom wake-word activation and multi-advisor conversational flows via Millis.ai (LLM integration).
 * Led 3 developers; enforced CI/CD automation and Level 2 VAPT security standards across enterprise financial flows.
 
-### **Full-Stack Developer & Data Custodian** | Fitwell Technologies Inc. *(Remote – VA, USA | Jun 2025 – Present)*
+### **Full-Stack Developer & Data Custodian** | Fitwell Technologies Inc. *(Remote – VA, USA | Jun 2025 – Jan 2026)*
 * Integrated LLM-powered features, Amazon Connect voice AI workflows, and HIPAA-compliant data pipelines on AWS private cloud.
 * Deployed self-hosted Supabase PostgreSQL cloud backend on EC2 for PHI data isolation; maintained zero data breach posture.
 
