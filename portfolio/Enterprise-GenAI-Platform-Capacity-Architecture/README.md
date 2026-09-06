@@ -129,28 +129,58 @@ Option C: Private Routed (Ours)  | [█████]                            
 # Start the Gateway with Docker Compose
 docker compose up --build -d
 
-# Check Gateway Health & Swagger UI
+# Check Control Plane Health (Port 8000) & Swagger UI
 curl http://localhost:8000/health
 open http://localhost:8000/docs
+
+# Check Production LLM API Gateway (Port 8001) & Swagger UI
+curl http://localhost:8001/health
+open http://localhost:8001/docs
 ```
 
 ### 2. Manual Local Setup
 ```bash
 pip install -r requirements.txt
+
+# Start Enterprise Control Plane (Port 8000)
 uvicorn src.control_plane.gateway:app --reload --port 8000
+
+# Or Start Production LLM API Gateway (Port 8001)
+uvicorn src.gateway.main:app --reload --port 8001
 ```
 
-### 3. Run GPU Capacity Sizing Calculator
+### 3. 🔐 Production-Grade LLM API Gateway (Port 8001)
+See detailed documentation in [docs/07_API_GATEWAY_LAYER.md](file:///Volumes/Exty/CrackingTheGenAI/portfolio/Enterprise-GenAI-Platform-Capacity-Architecture/docs/07_API_GATEWAY_LAYER.md) and article code mapping in [docs/ARTICLE_CODE_REFERENCE.md](file:///Volumes/Exty/CrackingTheGenAI/portfolio/Enterprise-GenAI-Platform-Capacity-Architecture/docs/ARTICLE_CODE_REFERENCE.md).
+
+- **Authentication**: High-performance PBKDF2 API key hashing with indexed 8-char prefixes ($O(1)$ DB lookups).
+- **Rate Limiting**: Sliding window RPM & TPM via atomic Redis Lua scripts (immune to boundary burst attacks).
+- **Token Quota**: Daily and monthly hard budgets with Redis hot-caching and PostgreSQL durable ledgering.
+- **Inference Concurrency**: Atomic slot semaphores with automatic 300s TTL expiry and client-disconnect cleanup.
+- **Streaming SSE**: First-class Server-Sent Events with Time-to-First-Token (TTFT) instrumentation and connection disconnect detection.
+
+```bash
+# Streaming chat completion via API Gateway:
+curl -N -X POST http://localhost:8001/v1/chat/completions \
+  -H "Authorization: Bearer <DEV_API_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "meta-llama/Llama-3-8b-Instruct",
+    "messages": [{"role": "user", "content": "Explain GPU memory bandwidth"}],
+    "stream": true
+  }'
+```
+
+### 4. Run GPU Capacity Sizing Calculator
 ```bash
 python src/cli.py size-cluster --model Claude-X-Frontier-70B --gpu NVIDIA-H100-SXM-80GB --concurrency 10000 --precision fp8
 ```
 
-### 4. Run FinOps 3-Year TCO Simulator
+### 5. Run FinOps 3-Year TCO Simulator
 ```bash
 python src/cli.py run-tco --fee-cr 4.80
 ```
 
-### 5. ⚡ Single-Line Admin & FinOps Control Commands
+### 6. ⚡ Single-Line Admin & FinOps Control Commands
 
 #### A. Instant Tenant Shutdown (Emergency Kill-Switch & Budget Quarantine)
 ```bash
@@ -184,7 +214,7 @@ kubectl scale deployment/enterprise-genai-gateway --replicas=1
 cd infra/terraform && terraform destroy -auto-approve
 ```
 
-### 6. Run Full Test Suite
+### 7. Run Full Test Suite
 ```bash
 pytest tests/ -v
 ```

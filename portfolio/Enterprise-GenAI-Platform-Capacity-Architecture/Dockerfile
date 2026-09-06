@@ -39,6 +39,7 @@ ENV PATH="/opt/venv/bin:$PATH" \
 # Copy application source and tests
 COPY --chown=appuser:appuser src/ ./src/
 COPY --chown=appuser:appuser tests/ ./tests/
+COPY --chown=appuser:appuser mock_inference/ ./mock_inference/
 COPY --chown=appuser:appuser requirements.txt .
 
 # Switch to non-root user

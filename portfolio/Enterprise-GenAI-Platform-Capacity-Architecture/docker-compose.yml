@@ -1,4 +1,5 @@
 services:
+  # ── Existing Enterprise Control Plane (Sizing, Guardrails, FinOps, Routing) ───
   gateway:
     build:
       context: .
@@ -17,3 +18,91 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
+
+  # ── Production-Grade LLM API Gateway (Auth, Quotas, Rate Limits, Streaming) ────
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: enterprise-api-gateway
+    restart: unless-stopped
+    command: ["uvicorn", "src.gateway.main:app", "--host", "0.0.0.0", "--port", "8001"]
+    ports:
+      - "8001:8001"
+    environment:
+      - GATEWAY_HOST=0.0.0.0
+      - GATEWAY_PORT=8001
+      - GATEWAY_ENV=development
+      - DATABASE_URL=postgresql+asyncpg://gateway:gateway_secret@postgres:5432/gateway_db
+      - REDIS_URL=redis://redis:6379/0
+      - INFERENCE_BACKEND=mock
+      - VLLM_BASE_URL=http://mock-inference:8002
+      - SECRET_KEY=dev-secret-key-change-in-production-min-32-chars!
+      - ENTERPRISE_GATEWAY_URL=http://gateway:8000
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mock-inference:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8001/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # ── Mock Inference Server (Simulates vLLM with realistic TTFT & streaming) ─────
+  mock-inference:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: enterprise-mock-inference
+    restart: unless-stopped
+    command: ["python", "mock_inference/server.py"]
+    ports:
+      - "8002:8002"
+    environment:
+      - PORT=8002
+      - HOST=0.0.0.0
+      - PYTHONUNBUFFERED=1
+
+  # ── Database Layer ────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: enterprise-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gateway
+      POSTGRES_PASSWORD: gateway_secret
+      POSTGRES_DB: gateway_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gateway -d gateway_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Cache & Rate Limiter Layer ────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: enterprise-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+  redisdata:
