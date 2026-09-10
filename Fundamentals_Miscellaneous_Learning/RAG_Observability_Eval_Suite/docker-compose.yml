@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  # ============================================================================
+  # Arize Phoenix (RAG Retrieval Quality, Tracing & Embedding Visualization)
+  # ============================================================================
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    container_name: cloudflow-phoenix
+    ports:
+      - "6006:6006" # UI and OTLP collector
+    environment:
+      - PHOENIX_PORT=6006
+      - PHOENIX_HOST=0.0.0.0
+    restart: unless-stopped
+
+  # ============================================================================
+  # Langfuse (Prompt Management, Detailed Traces & Score Logging)
+  # ============================================================================
+  langfuse-db:
+    image: postgres:16-alpine
+    container_name: cloudflow-langfuse-db
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=langfuse
+    ports:
+      - "5432:5432"
+    volumes:
+      - langfuse_postgres_data:/var/lib/postgresql/data
+
+  langfuse-server:
+    image: langfuse/langfuse:latest
+    container_name: cloudflow-langfuse-web
+    depends_on:
+      - langfuse-db
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@langfuse-db:5432/langfuse
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=changeme-supersecret-jwt-key-for-local-demo-1234
+      - SALT=changeme-supersecret-salt-key-for-local-demo-1234
+      - TELEMETRY_ENABLED=false
+    restart: unless-stopped
+
+volumes:
+  langfuse_postgres_data:

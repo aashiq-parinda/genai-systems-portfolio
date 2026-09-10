@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "text-analyzer": {
+      "command": "python",
+      "args": ["server.py"],
+      "cwd": "/REPLACE/WITH/YOUR/PATH/TO/MCP_Text_Analyzer_Tool"
+    }
+  }
+}

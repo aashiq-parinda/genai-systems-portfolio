@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "text-analyzer": {
+      "command": "/Volumes/Exty/CrackingTheGenAI/Fundamentals_Miscellaneous_Learning/MCP_Text_Analyzer_Tool/.venv/bin/python",
+      "args": ["/Volumes/Exty/CrackingTheGenAI/Fundamentals_Miscellaneous_Learning/MCP_Text_Analyzer_Tool/server.py"]
+    }
+  }
+}
