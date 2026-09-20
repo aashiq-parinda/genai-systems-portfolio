@@ -3,7 +3,7 @@
 > 🎯 **Target Roles**: GenAI Application Engineer | Applied AI Scientist | GenAI Infrastructure & MLOps Engineer | Lead / Principal AI Architect  
 > 🏷️ **Seniority Levels**: 🌱 Junior / Entry-Level (L3/E3) | 🥉 Mid-Level (L4/E4) | 🥈 Senior (L5/E5) | 🥇 Staff / Principal (L6+/E6+)  
 > 🏢 **Target Companies**: Meta | Google (DeepMind/GCP) | Amazon (AWS/Bedrock) | Apple | Netflix | OpenAI  
-> 📌 **Companion Artifacts**: [Portfolio README](README.md) | [GenAI Glossary Cheat Sheet](GENAI_GLOSSARY_CHEATSHEET.md) | [🧪 Core Algorithms Masterclass Notebook](notebooks/GenAI_Core_Algorithms_And_Evaluation_Masterclass.ipynb) | [⚡ Nano-Transformer (Micro-LLM) Notebook](notebooks/Nano_Transformer_Micro_LLM_From_Scratch.ipynb)  
+> 📌 **Complete MAANG GenAI Interview Suite**: [🎙️ Verbal Tech Round](GENAI_VERBAL_TECHNICAL_INTERVIEW_GUIDE.md) | [🤝 Behavioral & Leadership](GENAI_BEHAVIORAL_AND_LEADERSHIP_ROUND.md) | [🏛️ System Design Whiteboard](GENAI_SYSTEM_DESIGN_WHITEBOARD_PLAYBOOK.md) | [⚡ GPU Capacity & FinOps](GENAI_GPU_CAPACITY_FINOPS_WHITEBOARD_DRILL.md) | [🧬 Data & Synthetic Data](GENAI_DATA_ENGINEERING_SYNTHETIC_DATA_ROUND.md) | [📖 Glossary](GENAI_GLOSSARY_CHEATSHEET.md) | [📐 GPT Math](GPT_MATHEMATICAL_FORMULAS_EXPLAINED.md)  
 
 ---
 

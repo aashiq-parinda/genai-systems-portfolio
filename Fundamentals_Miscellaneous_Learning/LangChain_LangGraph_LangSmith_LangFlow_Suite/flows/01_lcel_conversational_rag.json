@@ -1,0 +1,134 @@
+{
+  "name": "01_lcel_conversational_rag",
+  "description": "Production Conversational RAG flow built with LangChain LCEL principles for LangFlow visual canvas",
+  "data": {
+    "nodes": [
+      {
+        "id": "node_chat_input",
+        "type": "genericNode",
+        "position": { "x": 100, "y": 200 },
+        "data": {
+          "type": "ChatInput",
+          "node": {
+            "display_name": "User Query Input",
+            "description": "Captures raw user query from chat interface",
+            "template": {
+              "input_value": { "value": "How do we implement hybrid vector search with BM25?" }
+            },
+            "outputs": [
+              { "name": "message", "display_name": "Message" }
+            ]
+          }
+        }
+      },
+      {
+        "id": "node_vector_store",
+        "type": "genericNode",
+        "position": { "x": 400, "y": 100 },
+        "data": {
+          "type": "QdrantVectorStore",
+          "node": {
+            "display_name": "Qdrant Vector DB",
+            "description": "Performs HNSW dense embedding lookup with metadata filtering",
+            "template": {
+              "collection_name": { "value": "knowledge_chunks" },
+              "top_k": { "value": 4 }
+            },
+            "outputs": [
+              { "name": "retriever", "display_name": "Retriever" }
+            ]
+          }
+        }
+      },
+      {
+        "id": "node_prompt_template",
+        "type": "genericNode",
+        "position": { "x": 700, "y": 200 },
+        "data": {
+          "type": "PromptTemplate",
+          "node": {
+            "display_name": "RAG Prompt Template",
+            "description": "Injects retrieved context and chat history into LLM prompt",
+            "template": {
+              "template": { "value": "Context:\n{context}\n\nQuestion: {question}\n\nProvide an accurate, grounded answer with citations:" }
+            },
+            "outputs": [
+              { "name": "prompt", "display_name": "Formatted Prompt" }
+            ]
+          }
+        }
+      },
+      {
+        "id": "node_llm_model",
+        "type": "genericNode",
+        "position": { "x": 1000, "y": 200 },
+        "data": {
+          "type": "ChatOpenAI",
+          "node": {
+            "display_name": "LLM Synthesis (gpt-4o)",
+            "description": "Generates grounded completion stream",
+            "template": {
+              "model_name": { "value": "gpt-4o" },
+              "temperature": { "value": 0.1 }
+            },
+            "outputs": [
+              { "name": "text", "display_name": "Synthesized Answer" }
+            ]
+          }
+        }
+      },
+      {
+        "id": "node_chat_output",
+        "type": "genericNode",
+        "position": { "x": 1300, "y": 200 },
+        "data": {
+          "type": "ChatOutput",
+          "node": {
+            "display_name": "Chat Output",
+            "description": "Delivers answer back to user interface",
+            "template": {},
+            "outputs": []
+          }
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e_input_to_retriever",
+        "source": "node_chat_input",
+        "target": "node_vector_store",
+        "sourceHandle": "message",
+        "targetHandle": "query"
+      },
+      {
+        "id": "e_input_to_prompt",
+        "source": "node_chat_input",
+        "target": "node_prompt_template",
+        "sourceHandle": "message",
+        "targetHandle": "question"
+      },
+      {
+        "id": "e_retriever_to_prompt",
+        "source": "node_vector_store",
+        "target": "node_prompt_template",
+        "sourceHandle": "retriever",
+        "targetHandle": "context"
+      },
+      {
+        "id": "e_prompt_to_llm",
+        "source": "node_prompt_template",
+        "target": "node_llm_model",
+        "sourceHandle": "prompt",
+        "targetHandle": "messages"
+      },
+      {
+        "id": "e_llm_to_output",
+        "source": "node_llm_model",
+        "target": "node_chat_output",
+        "sourceHandle": "text",
+        "targetHandle": "input_value"
+      }
+    ],
+    "viewport": { "x": 0, "y": 0, "zoom": 1 }
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "name": "02_langgraph_cyclic_agent",
+  "description": "Cyclic agent architecture in LangFlow matching LangGraph state-graph patterns: Planner, Tool Loop, Critic, and Approval Gate",
+  "data": {
+    "nodes": [
+      {
+        "id": "agent_input",
+        "type": "genericNode",
+        "position": { "x": 80, "y": 250 },
+        "data": {
+          "type": "ChatInput",
+          "node": {
+            "display_name": "Task Input",
+            "description": "User assigns complex goal or research objective",
+            "template": {
+              "input_value": { "value": "Benchmark Vector DB performance and submit report for approval." }
+            },
+            "outputs": [{ "name": "message", "display_name": "Task" }]
+          }
+        }
+      },
+      {
+        "id": "agent_planner",
+        "type": "genericNode",
+        "position": { "x": 350, "y": 250 },
+        "data": {
+          "type": "CustomComponent",
+          "node": {
+            "display_name": "Planner Node",
+            "description": "Decomposes complex prompt into sequential milestones",
+            "template": { "mode": "hierarchical" },
+            "outputs": [{ "name": "plan", "display_name": "Execution Plan" }]
+          }
+        }
+      },
+      {
+        "id": "agent_tool_executor",
+        "type": "genericNode",
+        "position": { "x": 650, "y": 150 },
+        "data": {
+          "type": "ToolCallingAgent",
+          "node": {
+            "display_name": "Research & Tool Node",
+            "description": "Executes API lookups, web search, and vector similarity",
+            "template": { "tools": ["vector_search", "web_lookup"] },
+            "outputs": [{ "name": "observations", "display_name": "Tool Findings" }]
+          }
+        }
+      },
+      {
+        "id": "agent_critic",
+        "type": "genericNode",
+        "position": { "x": 950, "y": 250 },
+        "data": {
+          "type": "CustomComponent",
+          "node": {
+            "display_name": "Critic / Evaluator Node",
+            "description": "Judges output quality against completeness rubric. Can loop back to Researcher.",
+            "template": { "min_score": 0.80 },
+            "outputs": [
+              { "name": "approved_draft", "display_name": "Draft" },
+              { "name": "revision_request", "display_name": "Revision (Loop)" }
+            ]
+          }
+        }
+      },
+      {
+        "id": "agent_human_gate",
+        "type": "genericNode",
+        "position": { "x": 1250, "y": 250 },
+        "data": {
+          "type": "CustomComponent",
+          "node": {
+            "display_name": "Human Approval Gate",
+            "description": "Pauses thread execution for human review and sign-off",
+            "template": { "role": "admin" },
+            "outputs": [{ "name": "final_payload", "display_name": "Final Approved Output" }]
+          }
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e_input_to_planner",
+        "source": "agent_input",
+        "target": "agent_planner",
+        "sourceHandle": "message",
+        "targetHandle": "task"
+      },
+      {
+        "id": "e_planner_to_tool",
+        "source": "agent_planner",
+        "target": "agent_tool_executor",
+        "sourceHandle": "plan",
+        "targetHandle": "plan_steps"
+      },
+      {
+        "id": "e_tool_to_critic",
+        "source": "agent_tool_executor",
+        "target": "agent_critic",
+        "sourceHandle": "observations",
+        "targetHandle": "findings"
+      },
+      {
+        "id": "e_critic_loop_to_tool",
+        "source": "agent_critic",
+        "target": "agent_tool_executor",
+        "sourceHandle": "revision_request",
+        "targetHandle": "revision_feedback"
+      },
+      {
+        "id": "e_critic_to_gate",
+        "source": "agent_critic",
+        "target": "agent_human_gate",
+        "sourceHandle": "approved_draft",
+        "targetHandle": "draft"
+      }
+    ],
+    "viewport": { "x": 0, "y": 0, "zoom": 1 }
+  }
+}

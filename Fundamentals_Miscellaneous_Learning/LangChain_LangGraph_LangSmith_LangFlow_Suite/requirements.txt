@@ -1,0 +1,13 @@
+# Core Runtime & Schema Validation
+pydantic>=2.7.0
+typing-extensions>=4.10.0
+
+# Official LangChain Ecosystem Libraries (Optional / For live ecosystem connectivity)
+langchain>=0.2.0
+langchain-core>=0.2.0
+langchain-community>=0.2.0
+langgraph>=0.1.0
+langsmith>=0.1.0
+
+# Official LangFlow Visual Dashboard (To run `langflow run` locally)
+langflow>=1.0.0
