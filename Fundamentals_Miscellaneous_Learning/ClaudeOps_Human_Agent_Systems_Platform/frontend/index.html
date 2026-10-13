@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClaudeOps Studio — Unified Pipeline & Line-by-Line Visual Debugger</title>
+  <meta name="description" content="Visual execution pipeline & live line-by-line debugger demonstrating Anthropic Claude Academy certifications.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #080a0f;
+      --bg-card: rgba(16, 20, 30, 0.85);
+      --bg-card-hover: rgba(24, 30, 46, 0.9);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(168, 85, 247, 0.5);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --claude-purple: #a855f7;
+      --claude-glow: rgba(168, 85, 247, 0.25);
+      --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-amber: #f59e0b;
+      --accent-yellow: #facc15;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-glow: 0 0 25px rgba(168, 85, 247, 0.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 10%, rgba(168, 85, 247, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.06) 0%, transparent 40%),
+        linear-gradient(to bottom, #05070a, #0a0c10);
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TOP HEADER */
+    header {
+      background: rgba(10, 12, 16, 0.9);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .logo-badge {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 20px; color: #fff;
+      box-shadow: 0 0 16px var(--claude-glow);
+    }
+
+    .brand-text h1 {
+      font-family: 'Outfit', sans-serif; font-size: 19px; font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .brand-text p { font-size: 11px; color: var(--text-muted); }
+
+    .header-badges { display: flex; gap: 8px; }
+    .badge {
+      font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px;
+      display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .badge-purple { color: #d8b4fe; border-color: rgba(168, 85, 247, 0.3); background: rgba(168, 85, 247, 0.1); }
+    .badge-cyan { color: #67e8f9; border-color: rgba(6, 182, 212, 0.3); background: rgba(6, 182, 212, 0.1); }
+    .badge-green { color: #6ee7b7; border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.1); }
+    .badge-amber { color: #fcd34d; border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.1); }
+
+    .header-controls { display: flex; align-items: center; gap: 10px; }
+    .select-scenario {
+      background: rgba(20, 24, 36, 0.9); border: 1px solid var(--border-subtle);
+      color: var(--text-main); padding: 7px 12px; border-radius: var(--radius-sm);
+      font-size: 12.5px; font-weight: 500; outline: none;
+    }
+
+    .btn {
+      padding: 7px 14px; border-radius: var(--radius-sm); font-size: 12.5px; font-weight: 600;
+      border: 1px solid transparent; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff;
+      box-shadow: 0 2px 10px rgba(168, 85, 247, 0.3);
+    }
+    .btn-primary:hover { box-shadow: 0 4px 16px rgba(168, 85, 247, 0.5); transform: translateY(-1px); }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05); border-color: var(--border-subtle); color: var(--text-main);
+    }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
+
+    .btn-debug {
+      background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; font-weight: 700;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+    }
+    .btn-debug:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(245, 158, 11, 0.5); }
+
+    /* MAIN VIEWPORT */
+    main {
+      flex: 1; padding: 18px 24px; display: grid; grid-template-columns: 380px 1fr;
+      gap: 20px; max-width: 1820px; margin: 0 auto; width: 100%;
+    }
+
+    /* LEFT: PIPELINE */
+    .pipeline-panel { display: flex; flex-direction: column; gap: 12px; }
+    .panel-header { display: flex; align-items: center; justify-content: space-between; }
+    .panel-title {
+      font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);
+    }
+    .pipeline-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .step-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md); padding: 10px 12px; cursor: pointer;
+      transition: all 0.2s ease; position: relative; overflow: hidden;
+    }
+    .step-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: transparent;
+    }
+    .step-card:hover { background: var(--bg-card-hover); transform: translateX(2px); }
+    .step-card.active {
+      border-color: var(--border-active); box-shadow: var(--shadow-glow);
+      background: rgba(30, 27, 48, 0.85);
+    }
+    .step-card.active::before { background: var(--claude-purple); }
+    .step-card.completed::before { background: var(--accent-green); }
+    .step-card.hitl-alert::before { background: var(--accent-amber); }
+
+    .step-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; }
+    .step-number { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 700; color: var(--text-dim); }
+    .step-badge { font-size: 9.5px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+    .step-badge-haiku { background: rgba(6, 182, 212, 0.15); color: #22d3ee; }
+    .step-badge-sonnet { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+    .step-badge-hitl { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .step-badge-fluency { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+
+    .step-title { font-size: 13px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; }
+    .step-desc { font-size: 11px; color: var(--text-muted); line-height: 1.35; margin-top: 2px; }
+    .step-file-tag {
+      margin-top: 5px; display: inline-flex; align-items: center; gap: 4px;
+      font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: #a5b4fc;
+      background: rgba(99, 102, 241, 0.12); padding: 2px 6px; border-radius: 4px;
+    }
+
+    /* RIGHT: UNIFIED DEBUGGER & INSPECTOR PANE */
+    .unified-viewer-panel {
+      display: flex; flex-direction: column; gap: 14px;
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); padding: 18px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+      max-height: calc(100vh - 110px);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(168, 85, 247, 0.4) rgba(15, 23, 42, 0.6);
+    }
+
+    /* 🎓 STUDENT EXPLANATION CARD (PLAIN ENGLISH) */
+    .student-card {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.1));
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(168, 85, 247, 0.12);
+      flex-shrink: 0;
+    }
+
+    .student-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .student-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: #e9d5ff;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .student-analogy-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: #fef08a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .student-explanation-body {
+      font-size: 13px;
+      line-height: 1.55;
+      color: #e2e8f0;
+    }
+
+    .student-takeaway {
+      font-size: 11.5px;
+      color: #a5b4fc;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    /* 💰 FINOPS 4-CARD MINI GRID */
+    .finops-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 2px;
+      flex-shrink: 0;
+    }
+    .stat-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .stat-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .stat-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .stat-value.savings {
+      color: var(--accent-green);
+    }
+
+    /* DEBUGGER CONTROLS ROW */
+    .debugger-subbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      flex-shrink: 0;
+    }
+
+    .debugger-subbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .live-file-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #38bdf8;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* CODE EDITOR GUTTER & LINES - ROCK SOLID UNCRUSHABLE HEIGHT */
+    .debugger-editor {
+      background: #05070a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+      transition: all 0.25s ease;
+      flex-shrink: 0;
+      flex-grow: 0;
+    }
+
+    .debugger-code-lines {
+      padding: 12px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      line-height: 24px;
+      overflow-x: auto;
+      overflow-y: auto;
+      height: 380px;
+      min-height: 380px;
+      max-height: 380px;
+      transition: height 0.25s ease, max-height 0.25s ease;
+    }
+
+    .debugger-editor.expanded .debugger-code-lines {
+      height: 600px;
+      min-height: 600px;
+      max-height: 600px;
+    }
+
+    .code-line-row {
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      transition: background 0.15s;
+    }
+
+    .code-line-gutter {
+      width: 44px;
+      color: #475569;
+      text-align: right;
+      padding-right: 14px;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .line-arrow {
+      color: transparent;
+      font-weight: 800;
+      font-size: 11px;
+    }
+
+    .code-line-text {
+      flex: 1;
+      color: #cbd5e1;
+      white-space: pre;
+    }
+
+    /* ACTIVE DEBUG LINE HIGHLIGHT */
+    .code-line-row.active-debug-line {
+      background: rgba(250, 204, 21, 0.22) !important;
+      border-left: 3px solid var(--accent-yellow);
+    }
+
+    .code-line-row.active-debug-line .line-arrow {
+      color: var(--accent-yellow);
+      text-shadow: 0 0 8px var(--accent-yellow);
+    }
+
+    .code-line-row.active-debug-line .code-line-gutter {
+      color: #fef08a;
+      font-weight: 700;
+    }
+
+    .code-line-row.active-debug-line .code-line-text {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    /* SPLIT BOTTOM GRID: VARIABLES WATCH & STEP I/O */
+    .bottom-split-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+
+    .debug-widget {
+      background: #07090e;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .debug-widget-title {
+      background: #0f172a;
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 6px 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .variables-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+    }
+
+    .variables-table th {
+      text-align: left;
+      padding: 5px 10px;
+      color: #64748b;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .variables-table td {
+      padding: 5px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .var-name { color: #38bdf8; font-weight: 600; }
+    .var-val { color: #a3e635; word-break: break-all; }
+    .var-val-bool { color: #f43f5e; font-weight: 700; }
+
+    /* STEP I/O BOX */
+    .io-preview-box {
+      padding: 10px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      color: #e2e8f0;
+      max-height: 160px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      background: #030508;
+    }
+
+    /* HITL BANNER */
+    .hitl-banner {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.08));
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      animation: pulse-border 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse-border {
+      0%, 100% { border-color: rgba(245, 158, 11, 0.5); box-shadow: 0 0 10px rgba(245, 158, 11, 0.15); }
+      50% { border-color: rgba(245, 158, 11, 0.9); box-shadow: 0 0 25px rgba(245, 158, 11, 0.3); }
+    }
+
+    .hitl-banner-top { display: flex; align-items: center; justify-content: space-between; }
+    .hitl-banner-title { font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; color: #fbbf24; }
+    /* ⚡ LIVE BUDGET METER & TOKEN ODOMETER */
+    .live-budget-meter-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.7));
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .budget-meter-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .budget-meter-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: #38bdf8;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .live-pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22d3ee;
+      box-shadow: 0 0 10px #22d3ee;
+      animation: pulse-dot 1.5s infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.35); opacity: 0.55; }
+    }
+    .budget-meter-stats {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      color: #f8fafc;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .budget-progress-track {
+      width: 100%;
+      height: 10px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+    .budget-progress-fill {
+      height: 100%;
+      width: 1.2%;
+      background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc);
+      border-radius: 999px;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    .budget-progress-fill.warning {
+      background: linear-gradient(90deg, #f59e0b, #ef4444);
+    }
+    .budget-meter-footer {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .burn-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .burn-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .burn-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .burn-sub {
+      font-size: 10.5px;
+      color: var(--text-muted);
+    }
+
+    /* HITL FINOPS ALLOCATOR */
+    .hitl-finops-allocator {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .allocator-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .token-allowance-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .token-option-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 9px 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .token-option-card:hover {
+      border-color: rgba(56, 189, 248, 0.5);
+      background: rgba(30, 41, 59, 0.9);
+    }
+    .token-option-card.selected {
+      border-color: #38bdf8;
+      background: rgba(14, 116, 144, 0.22);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+    }
+    .token-option-card input[type="radio"] {
+      margin-top: 3px;
+      accent-color: #38bdf8;
+      cursor: pointer;
+    }
+    .token-option-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+    }
+    .token-option-badge {
+      position: absolute;
+      top: -8px;
+      right: 8px;
+      background: #f59e0b;
+      color: #0f172a;
+      font-size: 8.5px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .token-option-tokens {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+    .token-option-cost {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      color: #38bdf8;
+    }
+    .token-option-desc {
+      font-size: 10px;
+      color: #94a3b8;
+      line-height: 1.3;
+    }
+    .allowance-summary-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 7px 10px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 4px;
+      border: 1px dashed rgba(255, 255, 255, 0.12);
+    }
+    .hitl-actions { display: flex; gap: 10px; margin-top: 6px; }
+    .btn-approve { background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: 700; cursor: pointer; border: none; padding: 10px 16px; border-radius: 6px; }
+    .btn-approve:hover { filter: brightness(1.1); box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+    .btn-reject { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; font-weight: 600; cursor: pointer; padding: 10px 16px; border-radius: 6px; }
+    .btn-reject:hover { background: rgba(239, 68, 68, 0.25); color: #fff; }
+
+    /* FOOTER */
+    footer {
+      background: rgba(10, 12, 16, 0.95); border-top: 1px solid var(--border-subtle);
+      padding: 10px 28px; display: flex; align-items: center; justify-content: space-between;
+      font-size: 12px; color: var(--text-dim);
+    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-green); box-shadow: 0 0 8px var(--accent-green); }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <div class="logo-badge">C</div>
+      <div class="brand-text">
+        <h1>ClaudeOps Studio <span class="badge badge-purple">Debugger Edition</span></h1>
+        <p>Anthropic Claude Academy • Platform 101 • Human-Agent Teams • AI Fluency</p>
+      </div>
+    </div>
+
+    <div class="header-badges">
+      <span class="badge badge-cyan">⚡ Haiku 3.5</span>
+      <span class="badge badge-purple">🧠 Sonnet 3.5</span>
+      <span class="badge badge-amber">🛑 HITL Gate</span>
+      <span class="badge badge-green">💾 Prompt Cache 90%</span>
+    </div>
+
+    <div class="header-controls">
+      <select id="scenarioSelector" class="select-scenario" onchange="switchScenario(this.value)">
+        <option value="auth_timing">Scenario 1: P0 Auth Timing Attack & Rate Limiting</option>
+        <option value="patient_sqli">Scenario 2: Healthcare Patient DB SQL Injection</option>
+        <option value="fin_concurrency">Scenario 3: Payment Double-Spending Race Condition</option>
+      </select>
+      <button class="btn btn-primary" id="btnRunPipeline" onclick="toggleRunPipeline()">▶ Run Pipeline (Auto-Step)</button>
+      <button class="btn btn-debug" id="btnStepLine" onclick="stepSingleLine()">⏭ Step Line (F10)</button>
+      <button class="btn btn-secondary" onclick="nextPipelineStep()">Next Step ➔</button>
+      <button class="btn btn-secondary" onclick="resetPipeline()">🔄 Reset</button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+    <!-- LEFT: 7-STEP PIPELINE -->
+    <section class="pipeline-panel">
+      <div class="panel-header">
+        <span class="panel-title">Execution Pipeline (<span id="stepCounter">Step 1/7</span>)</span>
+        <span id="pipelineStatusBadge" class="badge badge-cyan">Ready</span>
+      </div>
+
+      <div class="pipeline-list">
+        <!-- Step 1 -->
+        <div class="step-card active" id="card-step-1" onclick="selectStep(1)">
+          <div class="step-top">
+            <span class="step-number">STEP 01</span>
+            <span class="step-badge step-badge-haiku">Haiku 3.5</span>
+          </div>
+          <div class="step-title"><span>1. Intent Triage & Routing</span> <span class="step-status-icon" id="icon-step-1">⏳</span></div>
+          <div class="step-desc">Classifies incident urgency, parses CVE risk, and dispatches to Security Specialist agent.</div>
+          <div class="step-file-tag">src/core/workflows.py • route_request()</div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-card" id="card-step-2" onclick="selectStep(2)">
+          <div class="step-top">
+            <span class="step-number">STEP 02</span>
+            <span class="step-badge step-badge-sonnet">Claude 101</span>
+          </div>
+          <div class="step-title"><span>2. XML Prompt & Context</span> <span class="step-status-icon" id="icon-step-2">⚪</span></div>
+          <div class="step-desc">Assembles canonical &lt;system&gt;, &lt;context&gt;, and &lt;negative_constraints&gt; tags.</div>
+          <div class="step-file-tag">src/core/prompt_engine.py • format_xml_prompt()</div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-card" id="card-step-3" onclick="selectStep(3)">
+          <div class="step-top">
+            <span class="step-number">STEP 03</span>
+            <span class="step-badge step-badge-sonnet">Sonnet 3.5</span>
+          </div>
+          <div class="step-title"><span>3. Scratchpad &lt;thinking&gt;</span> <span class="step-status-icon" id="icon-step-3">⚪</span></div>
+          <div class="step-desc">Explores timing attacks & race conditions inside isolated &lt;thinking&gt; scratchpad.</div>
+          <div class="step-file-tag">src/core/prompt_engine.py • extract_scratchpad()</div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-card" id="card-step-4" onclick="selectStep(4)">
+          <div class="step-top">
+            <span class="step-number">STEP 04</span>
+            <span class="step-badge step-badge-sonnet">FinOps 90%</span>
+          </div>
+          <div class="step-title"><span>4. Prompt Caching Economics</span> <span class="step-status-icon" id="icon-step-4">⚪</span></div>
+          <div class="step-desc">Leverages ephemeral cache_control on 45K token codebase prefix for 90% savings.</div>
+          <div class="step-file-tag">src/telemetry/metrics_logger.py • calculate_cost()</div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="step-card" id="card-step-5" onclick="selectStep(5)">
+          <div class="step-top">
+            <span class="step-number">STEP 05</span>
+            <span class="step-badge step-badge-sonnet">ReAct Loop</span>
+          </div>
+          <div class="step-title"><span>5. Dynamic Tool Calling</span> <span class="step-status-icon" id="icon-step-5">⚪</span></div>
+          <div class="step-desc">Autonomous ReAct agent inspects virtual filesystem and prepares constant-time patch.</div>
+          <div class="step-file-tag">src/core/react_agent.py & src/tools/code_tools.py</div>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="step-card hitl-alert" id="card-step-6" onclick="selectStep(6)">
+          <div class="step-top">
+            <span class="step-number">STEP 06</span>
+            <span class="step-badge step-badge-hitl">HITL Gate</span>
+          </div>
+          <div class="step-title"><span>6. 🛑 Pre-Action Approval Gate</span> <span class="step-status-icon" id="icon-step-6">⚪</span></div>
+          <div class="step-desc">Intercepts state-mutating patch before modifying source code; awaits Tech Lead sign-off.</div>
+          <div class="step-file-tag">src/core/hitl_controller.py • classify_action_risk()</div>
+        </div>
+
+        <!-- Step 7 -->
+        <div class="step-card" id="card-step-7" onclick="selectStep(7)">
+          <div class="step-top">
+            <span class="step-number">STEP 07</span>
+            <span class="step-badge step-badge-fluency">AI Fluency</span>
+          </div>
+          <div class="step-title"><span>7. Anti-Sycophancy & Audit</span> <span class="step-status-icon" id="icon-step-7">⚪</span></div>
+          <div class="step-desc">Refutes bad developer shortcuts; issues cryptographic JSON audit receipt with FinOps.</div>
+          <div class="step-file-tag">src/tools/audit_tools.py & metrics_logger.py</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: UNIFIED VIEWER & DEBUGGER PANE -->
+    <section class="unified-viewer-panel">
+      <!-- 🎓 STUDENT EXPLANATION CARD (PLAIN ENGLISH) -->
+      <div class="student-card" id="studentExplanationCard">
+        <div class="student-card-header">
+          <span class="student-badge">🎓 Student Explanation • What is happening right now?</span>
+          <span class="badge badge-purple" id="studentConceptBadge">Anthropic Pattern: Routing</span>
+        </div>
+        <div class="student-analogy-title" id="studentAnalogyTitle">
+          💡 Think of this like: An Emergency Room Triage Nurse
+        </div>
+        <div class="student-explanation-body" id="studentExplanationText">
+          Instead of waking up the chief surgeon for a tiny bandage, a super-fast nurse (Claude 3.5 Haiku) looks at the patient in 100 milliseconds and says: 'This is an urgent security issue, send it immediately to the AppSec Specialist doctor!'
+        </div>
+        <div class="student-takeaway" id="studentTakeaway">
+          📌 <strong>Key Learning:</strong> Always use cheap, fast models (Haiku) to classify and route requests before calling expensive reasoning models.
+        </div>
+      </div>
+
+      <!-- ⚡ LIVE TOKEN SPENDING & BUDGET BURN ODOMETER -->
+      <div class="live-budget-meter-card" id="liveBudgetMeter">
+        <div class="budget-meter-header">
+          <div class="budget-meter-title">
+            <span class="live-pulse-dot"></span>
+            <span>⚡ LIVE TOKEN SPENDING & BUDGET BURN ODOMETER</span>
+            <span class="badge badge-purple" id="budgetVelocityBadge">Rate: ~1.2k tok/step</span>
+          </div>
+          <div class="budget-meter-stats">
+            <span id="burnPercentageText" style="color: #38bdf8;">1.2% Budget Burned</span>
+            <span style="color: #64748b;">•</span>
+            <span id="budgetCapText" style="color: #94a3b8;">Cap: 100,000 tok</span>
+          </div>
+        </div>
+
+        <!-- Animated Progress Track & Fill -->
+        <div class="budget-progress-track">
+          <div class="budget-progress-fill" id="budgetProgressFill" style="width: 1.2%;"></div>
+        </div>
+
+        <div class="budget-meter-footer">
+          <div class="burn-stat">
+            <span class="burn-label">Cumulative Burned</span>
+            <div>
+              <strong class="burn-value" id="burnTokensCumulative" style="color: #38bdf8;">1,200 tok</strong>
+              <span class="burn-sub" id="burnTokensCost">($0.0010)</span>
+            </div>
+          </div>
+          <div class="burn-stat">
+            <span class="burn-label">Available Budget</span>
+            <div>
+              <strong class="burn-value" id="burnTokensRemaining" style="color: #a3e635;">98,800 tok</strong>
+              <span class="burn-sub">Remaining</span>
+            </div>
+          </div>
+          <div class="burn-stat">
+            <span class="burn-label">Prompt Cache Saved</span>
+            <div>
+              <strong class="burn-value" id="burnTokensSaved" style="color: #c084fc;">$0.0000</strong>
+              <span class="burn-sub" id="burnSavingsPctText">(90% discount)</span>
+            </div>
+          </div>
+          <div class="burn-stat">
+            <span class="burn-label">Extra Token Allowance</span>
+            <div>
+              <strong class="burn-value" id="burnExtraGranted" style="color: #fbbf24;">+0 tok</strong>
+              <span class="burn-sub" id="burnExtraStatus">Awaiting HITL</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 💰 FINOPS & TOKEN COST EXTRA METRICS BAR -->
+      <div class="finops-grid" id="finopsBar" style="margin-top: 0px;">
+        <div class="stat-card">
+          <span class="stat-label">Model Tier & Latency</span>
+          <span class="stat-value" id="statModelTier" style="font-size: 13.5px; color: #38bdf8;">Haiku 3.5 (112ms)</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Uncached Input Tokens</span>
+          <span class="stat-value" id="statUncachedTokens">1,200 tok ($0.0010)</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Cached Tokens (90% Off)</span>
+          <span class="stat-value" id="statCachedTokens" style="color: #c084fc;">0 tok</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">FinOps Net Savings</span>
+          <span class="stat-value savings" id="statSavingsPct">Fast Triage ($0.0010)</span>
+        </div>
+      </div>
+
+      <!-- HITL DECISION & FINOPS RESOURCE AUTHORIZATION BANNER (Triggers on Step 6) -->
+      <div id="hitlDecisionBox" class="hitl-banner" style="display: none;">
+        <div class="hitl-banner-top">
+          <div class="hitl-banner-title">🛑 HUMAN-IN-THE-LOOP CONTROL & FINOPS AUTHORIZATION GATE</div>
+          <span class="badge badge-amber">STATE_MUTATING ACTION INTERCEPTED</span>
+        </div>
+        <p style="font-size: 13px; color: #fde68a; line-height: 1.5; margin: 0;">
+          The ReAct agent wants to rewrite <strong id="hitlTargetFile">src/api/auth.py</strong> to eliminate the timing attack vulnerability. Automated sandbox unit tests passed, but Anthropic's safety policy prohibits agents from writing code to disk without human review!
+        </p>
+
+        <!-- FINOPS RESOURCE AUTHORIZATION (MORE TOKENS TO SPEND) -->
+        <div class="hitl-finops-allocator">
+          <div class="allocator-header">
+            <div style="font-weight: 700; color: #f8fafc; font-size: 12.5px; display: flex; align-items: center; gap: 8px;">
+              <span>💰 FINOPS GATEKEEPER: Authorize Token Spending Allowance</span>
+              <span class="badge badge-cyan" id="hitlPreSpendBadge">77,200 Tokens Burned ($0.0612)</span>
+            </div>
+            <span style="font-size: 11px; color: #94a3b8;">Review spend so far and authorize extra token quota for patch commit & verification:</span>
+          </div>
+
+          <div class="token-allowance-options">
+            <label class="token-option-card" id="tokenOptCard5k">
+              <input type="radio" name="tokenAllowance" value="5000" onchange="updateSelectedTokenAllowance(5000, 0.015, this)">
+              <div class="token-option-content">
+                <div class="token-option-tokens">+5,000 Tokens</div>
+                <div class="token-option-cost">+$0.015 USD</div>
+                <div class="token-option-desc">Quick Smoke Verification (Basic patch syntax check)</div>
+              </div>
+            </label>
+
+            <label class="token-option-card selected" id="tokenOptCard15k">
+              <input type="radio" name="tokenAllowance" value="15000" checked onchange="updateSelectedTokenAllowance(15000, 0.045, this)">
+              <div class="token-option-content">
+                <div class="token-option-badge">RECOMMENDED</div>
+                <div class="token-option-tokens">+15,000 Tokens</div>
+                <div class="token-option-cost">+$0.045 USD</div>
+                <div class="token-option-desc">Full Test Suite + Constant-Time HMAC Timing Proof</div>
+              </div>
+            </label>
+
+            <label class="token-option-card" id="tokenOptCard30k">
+              <input type="radio" name="tokenAllowance" value="30000" onchange="updateSelectedTokenAllowance(30000, 0.090, this)">
+              <div class="token-option-content">
+                <div class="token-option-tokens">+30,000 Tokens</div>
+                <div class="token-option-cost">+$0.090 USD</div>
+                <div class="token-option-desc">Adversarial Red-Team Fuzzing & Mutation Audit</div>
+              </div>
+            </label>
+          </div>
+
+          <!-- Dynamic Allowance Summary -->
+          <div class="allowance-summary-bar">
+            <div style="font-size: 11.5px; color: #cbd5e1;">
+              <span>Pre-Gate Spend: <strong>77,200 tok ($0.0612)</strong></span>
+              <span style="color: #64748b; margin: 0 6px;">+</span>
+              <span>Authorized Allowance: <strong id="selectedAllowanceLabel" style="color: #38bdf8;">+15,000 tok ($0.0450)</strong></span>
+              <span style="color: #64748b; margin: 0 6px;">=</span>
+              <span>New Budget Cap: <strong id="newCapLabel" style="color: #a3e635;">115,000 Tokens</strong></span>
+            </div>
+            <div style="font-size: 11px; color: #c084fc;">
+              💾 Prompt Cache Savings: <strong>$0.1704 (73.6%)</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="hitl-actions">
+          <button class="btn btn-approve" id="btnApproveHitl" onclick="approveHITLAction()">
+            ✓ Authorize Token Allowance & Commit Patch
+          </button>
+          <button class="btn btn-reject" onclick="rejectHITLAction()">
+            ✕ Reject / Revoke Budget & Ask Agent to Revise
+          </button>
+        </div>
+      </div>
+
+      <!-- DEBUGGER TOOLBAR & LIVE POINTER SUBBAR -->
+      <div class="debugger-subbar">
+        <div class="debugger-subbar-left">
+          <span class="live-file-badge">
+            <span>📄 Active Code File:</span>
+            <strong id="liveFileLabel" style="color: #c084fc;">src/core/workflows.py</strong>
+          </span>
+          <span class="badge badge-cyan" id="liveFunctionBadge">route_request()</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #facc15;">
+            Executing Line: <strong id="debugLineNumDisplay">1</strong> | Step: <span id="debugStepFraction">1/7</span>
+          </div>
+          <button class="btn btn-sm btn-ghost" id="btnToggleEditorHeight" onclick="toggleEditorHeight()" style="padding: 3px 9px; font-size: 11px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid rgba(255,255,255,0.18);" title="Toggle taller code window height">
+            <span id="editorHeightIcon">⤢</span> <span id="editorHeightText">Taller View</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- LIVE CODE EDITOR WITH ACTIVE LINE POINTER -->
+      <div class="debugger-editor">
+        <div class="debugger-code-lines" id="liveCodeLinesContainer"></div>
+      </div>
+
+      <!-- SPLIT BOTTOM: VARIABLES WATCH WINDOW & LIVE I/O PREVIEW -->
+      <div class="bottom-split-grid">
+        <!-- VARIABLES WATCH WINDOW -->
+        <div class="debug-widget">
+          <div class="debug-widget-title">
+            <span>🔎 Local Variables & Memory (Watch Window)</span>
+            <span style="color: #38bdf8; font-size: 10px;">Live In-Memory State</span>
+          </div>
+          <div style="overflow-y: auto; max-height: 170px;">
+            <table class="variables-table">
+              <thead>
+                <tr>
+                  <th style="width: 40%;">Variable</th>
+                  <th>Current Value</th>
+                </tr>
+              </thead>
+              <tbody id="debugVariablesTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- LIVE OUTPUT / DIFF PREVIEW -->
+        <div class="debug-widget">
+          <div class="debug-widget-title">
+            <span id="outputWidgetTitle">📥 Live Output / Git Diff / Receipts</span>
+            <span style="color: #10b981; font-size: 10px;" id="outputStatusTag">Verified</span>
+          </div>
+          <div class="io-preview-box" id="stepOutputPreview"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <span class="dot"></span>
+      <span>Engine: Online (Unified Pipeline & Line-by-Line Debugger Active)</span>
+      <span>•</span>
+      <span>Workspace: <strong>Fundamentals_Miscellaneous_Learning/ClaudeOps_Human_Agent_Systems_Platform</strong></span>
+    </div>
+    <div>
+      <span>Generative AI Systems Engineering Portfolio • Ashraf Khan</span>
+    </div>
+  </footer>
+
+  <!-- SCRIPT -->
+  <script>
+    // -------------------------------------------------------------
+    // 7 PIPELINE STEPS: CODE LINES, VARIABLES & STUDENT EXPLANATIONS
+    // -------------------------------------------------------------
+    const PIPELINE_STEPS = {
+      1: {
+        file: "src/core/workflows.py",
+        funcName: "AnthropicWorkflows.route_request()",
+        concept: "Anthropic Pattern: Intelligent Routing",
+        analogyTitle: "💡 Think of this like: An Emergency Room Triage Nurse",
+        studentExplanation: "Instead of waking up the chief surgeon for a tiny bandage, a super-fast assistant (Claude 3.5 Haiku) looks at the ticket in 100 milliseconds and says: 'This is an urgent security issue, send it immediately to the AppSec Specialist doctor!'",
+        takeaway: "Always use cheap, ultra-fast models (Haiku) to classify and route requests before calling expensive reasoning models.",
+        lines: [
+          "def route_request(user_request: str, routes: dict) -> dict:",
+          "    req_lower = user_request.lower()",
+          "    if any(w in req_lower for w in ['security', 'cve', 'auth', 'injection']):",
+          "        selected_route = 'security_audit'",
+          "    elif any(w in req_lower for w in ['perf', 'slow', 'latency', 'memory']):",
+          "        selected_route = 'performance_optimization'",
+          "    handler = routes.get(selected_route, routes.get('default'))",
+          "    execution_result = handler(user_request)",
+          "    return {'workflow': 'ROUTING', 'model': 'claude-3-5-haiku', 'route': selected_route, 'result': execution_result}"
+        ],
+        substeps: [
+          { lineIdx: 0, vars: { user_request: '"URGENT: Timing attack in auth login!"', routes: "{'security_audit': fn, ...}" } },
+          { lineIdx: 1, vars: { user_request: '"URGENT: Timing attack in auth login!"', req_lower: '"urgent: timing attack in auth login!"' } },
+          { lineIdx: 2, vars: { req_lower: '"urgent: timing attack in auth login!"', matched_keyword: "'auth', 'attack' (True)" } },
+          { lineIdx: 3, vars: { selected_route: '"security_audit"' } },
+          { lineIdx: 6, vars: { selected_route: '"security_audit"', handler: "SecurityHardeningAgent" } },
+          { lineIdx: 7, vars: { execution_result: "{ 'priority': 'P0_CRITICAL', 'latency_ms': 112 }" } },
+          { lineIdx: 8, vars: { return_payload: "{ 'route': 'security_audit', 'model': 'claude-3-5-haiku' }" } }
+        ],
+        output: `{\n  "workflow": "ROUTING",\n  "model_used": "claude-3-5-haiku-20241022",\n  "selected_route": "security_audit",\n  "result": {\n    "handler": "SecurityHardeningAgent",\n    "priority": "P0_CRITICAL",\n    "latency_ms": 112\n  }\n}`
+      },
+
+      2: {
+        file: "src/core/prompt_engine.py",
+        funcName: "ClaudePromptEngine.format_xml_prompt()",
+        concept: "Claude Platform 101: XML Prompt Architecture",
+        analogyTitle: "💡 Think of this like: Writing an Exam with Neat Section Headings",
+        studentExplanation: "If you hand a teacher a messy page with no headings, they will get confused. Anthropic trained Claude to love XML tags (<system>, <context>, <instructions>) so it knows exactly what the rules are and never confuses your instructions with user data!",
+        takeaway: "XML tags prevent prompt injections and eliminate conversational filler.",
+        lines: [
+          "def format_xml_prompt(system_role, instructions, user_input, context=None, negative_constraints=None):",
+          "    parts = [f'<system>\\n{system_role}\\n</system>']",
+          "    if context:",
+          "        parts.append(f'<context>\\n{context}\\n</context>')",
+          "    inst_list = list(instructions) + ['Wrap intermediate reasoning in <thinking> tags.']",
+          "    parts.append('<instructions>\\n' + '\\n'.join(f'{i+1}. {x}' for i, x in enumerate(inst_list)) + '\\n</instructions>')",
+          "    if negative_constraints:",
+          "        parts.append('<negative_constraints>\\n' + '\\n'.join(f'- {c}' for c in negative_constraints) + '\\n</negative_constraints>')",
+          "    parts.append(f'<user_input>\\n{user_input}\\n</user_input>')",
+          "    return '\\n\\n'.join(parts)"
+        ],
+        substeps: [
+          { lineIdx: 0, vars: { system_role: '"Staff AppSec Engineer"', instructions: "['Inspect auth.py', 'Inject HMAC']" } },
+          { lineIdx: 1, vars: { "parts[0]": "'<system>Staff AppSec Engineer</system>'" } },
+          { lineIdx: 3, vars: { "parts[1]": "'<context>Python 3.11, FastAPI, Redis 7.2</context>'" } },
+          { lineIdx: 5, vars: { "parts[2]": "'<instructions>1. Inspect auth.py... 2. Inject HMAC</instructions>'" } },
+          { lineIdx: 7, vars: { "parts[3]": "'<negative_constraints>- Never disable unit tests</negative_constraints>'" } },
+          { lineIdx: 8, vars: { "parts[4]": "'<user_input>URGENT: Timing attack in login</user_input>'" } },
+          { lineIdx: 9, vars: { return_payload: "Structured XML prompt string (1,450 characters)" } }
+        ],
+        output: `<system>\nYou are a Staff AppSec & Distributed Systems Engineer.\n</system>\n\n<context>\nPython 3.11, FastAPI microservice, Redis-backed rate limiter.\n</context>\n\n<instructions>\n1. Inspect auth.py for timing attacks.\n2. Replace equality operator with constant-time HMAC comparison.\n3. Wrap intermediate reasoning in <thinking> tags.\n</instructions>\n\n<negative_constraints>\n- Never disable unit tests\n- Do not add unapproved PyPI dependencies\n</negative_constraints>`
+      },
+
+      3: {
+        file: "src/core/prompt_engine.py",
+        funcName: "ClaudePromptEngine.extract_scratchpad_and_answer()",
+        concept: "Claude Platform 101: Chain-of-Thought (<thinking>)",
+        analogyTitle: "💡 Think of this like: Scratch Paper During a Tough Math Exam",
+        studentExplanation: "If you try to solve a big equation in your head and write the answer immediately, you'll make silly mistakes. In <thinking> tags, Claude works out the math and logic step-by-step on scratch paper before showing you the clean final code!",
+        takeaway: "Separating <thinking> from the final answer prevents human cognitive overload while preserving full reasoning depth.",
+        lines: [
+          "def extract_scratchpad_and_answer(response_text: str) -> Tuple[Optional[str], str]:",
+          "    pattern = r'<thinking>(.*?)</thinking>'",
+          "    match = re.search(pattern, response_text, re.DOTALL)",
+          "    thinking = match.group(1).strip() if match else None",
+          "    cleaned_answer = re.sub(pattern, '', response_text, flags=re.DOTALL).strip()",
+          "    return thinking, cleaned_answer"
+        ],
+        substeps: [
+          { lineIdx: 0, vars: { response_text: "'<thinking>1. String equality short-circuits... 2. Use hmac</thinking> Verified Patch...'" } },
+          { lineIdx: 1, vars: { pattern: "r'<thinking>(.*?)</thinking>'" } },
+          { lineIdx: 2, vars: { match: "<re.Match object; span=(0, 248)>" } },
+          { lineIdx: 3, vars: { thinking: "'1. String equality short-circuits... 2. Use hmac.compare_digest()'" } },
+          { lineIdx: 4, vars: { cleaned_answer: "'Verified Patch Proposed: Added constant-time HMAC comparison.'" } },
+          { lineIdx: 5, vars: { result: "Tuple(thinking_scratchpad, clean_user_answer)" } }
+        ],
+        output: `🧠 EXTRACTED <thinking> SCRATCHPAD:\n1. Vulnerability Analysis:\n   - Existing check: if password == 'admin_secret'\n   - Standard Python string equality short-circuits on 1st mismatched character.\n   - Attackers measure nanosecond deltas to guess passwords character-by-character.\n\n2. Remediation Strategy:\n   - Use hmac.compare_digest() for strict constant-time comparison.\n   - Add check_rate_limit(username) to prevent brute-force.\n   - No new external dependencies required!`
+      },
+
+      4: {
+        file: "src/telemetry/metrics_logger.py",
+        funcName: "FinOpsTelemetryLogger.calculate_cost()",
+        concept: "Claude Platform 101: Prompt Caching FinOps (90% Discount)",
+        analogyTitle: "💡 Think of this like: Photocopying a 100-page Textbook Once",
+        studentExplanation: "Instead of re-typing the entire 100-page textbook every single time you want to ask a question, you keep it photocopied on your desk. Anthropic caches the big codebase in memory for 5 minutes, giving you a massive 90% discount on every request!",
+        takeaway: "Using cache_control: ephemeral drops API cost from $0.168 down to $0.046 per run (72.3% net savings).",
+        lines: [
+          "def calculate_cost(input_tokens: int, output_tokens: int, cached_read_tokens: int = 0):",
+          "    pricing = PRICING_REGISTRY[self.model]  # Sonnet: $3.00/M in, $0.30/M cached (90% off)",
+          "    cost_uncached = (input_tokens / 1_000_000) * pricing.input_per_m",
+          "    cost_cached = (cached_read_tokens / 1_000_000) * pricing.cache_read_per_m",
+          "    cost_output = (output_tokens / 1_000_000) * pricing.output_per_m",
+          "    actual_total = cost_uncached + cost_cached + cost_output",
+          "    hypothetical_total = (((input_tokens + cached_read_tokens) / 1_000_000) * pricing.input_per_m) + cost_output",
+          "    savings_usd = max(0.0, hypothetical_total - actual_total)",
+          "    return {'actual_total_usd': actual_total, 'savings_usd': savings_usd, 'savings_pct': 72.32}"
+        ],
+        substeps: [
+          { lineIdx: 0, vars: { input_tokens: "5000", output_tokens: "1200", cached_read_tokens: "45000" } },
+          { lineIdx: 1, vars: { "pricing.input_per_m": "$3.00", "pricing.cache_read_per_m": "$0.30 (90% off)", "pricing.output_per_m": "$15.00" } },
+          { lineIdx: 2, vars: { cost_uncached: "$0.0150 (5K tokens)" } },
+          { lineIdx: 3, vars: { cost_cached: "$0.0135 (45K tokens - saved $0.1215!)" } },
+          { lineIdx: 4, vars: { cost_output: "$0.0180 (1.2K tokens)" } },
+          { lineIdx: 5, vars: { actual_total: "$0.0465" } },
+          { lineIdx: 6, vars: { hypothetical_total: "$0.1680" } },
+          { lineIdx: 7, vars: { savings_usd: "$0.1215", savings_pct: "72.32%" } },
+          { lineIdx: 8, vars: { result: "FinOps verification receipt ready" } }
+        ],
+        output: `{\n  "actual_total_usd": 0.0465,\n  "uncached_hypothetical_usd": 0.1680,\n  "savings_usd": 0.1215,\n  "savings_percentage": 72.32,\n  "cache_efficiency": "90% read discount applied to 45,000 cached tokens"\n}`
+      },
+
+      5: {
+        file: "src/core/react_agent.py",
+        funcName: "ReActAgent.run()",
+        concept: "Human-Agent Teams: Autonomous ReAct Dynamic Loop",
+        analogyTitle: "💡 Think of this like: An Engineering Intern Investigating a Bug",
+        studentExplanation: "The agent doesn't just guess; it acts in a loop: 1. Reason ('Let me read auth.py first'), 2. Act (call read_file tool), 3. Observe the code, 4. Prepare the patch. But it is programmed to stop before touching the real production database!",
+        takeaway: "Autonomous agents must have bounded iteration limits (MAX_ITERATIONS = 8) to prevent runaway loops.",
+        lines: [
+          "def run(self, user_goal: str, human_approval_hook = None):",
+          "    iteration = 0",
+          "    while iteration < MAX_AGENT_ITERATIONS:",
+          "        iteration += 1",
+          "        selected_tool = 'read_file' if iteration == 1 else 'apply_patch'",
+          "        tool_args = {'file_path': 'src/api/auth.py'}",
+          "        risk, requires_approval, rationale = HITLController.classify_action_risk(selected_tool, tool_args)",
+          "        if requires_approval and not human_approval_hook(selected_tool):",
+          "            return {'status': 'HALTED_AWAITING_APPROVAL'}",
+          "        observation = self.tools[selected_tool](tool_args)",
+          "    return {'status': 'COMPLETED'}"
+        ],
+        substeps: [
+          { lineIdx: 0, vars: { user_goal: '"Harden auth.py against timing attacks"' } },
+          { lineIdx: 1, vars: { iteration: "0" } },
+          { lineIdx: 2, vars: { "iteration < MAX": "True" } },
+          { lineIdx: 3, vars: { iteration: "1" } },
+          { lineIdx: 4, vars: { selected_tool: '"read_file"' } },
+          { lineIdx: 6, vars: { risk: '"READ_ONLY"', requires_approval: "False" } },
+          { lineIdx: 9, vars: { observation: "Read 15 lines of auth.py successfully" } },
+          { lineIdx: 3, vars: { iteration: "2" } },
+          { lineIdx: 4, vars: { selected_tool: '"apply_patch"' } },
+          { lineIdx: 6, vars: { risk: '"STATE_MUTATING"', requires_approval: "True" } },
+          { lineIdx: 7, vars: { hitl_gate_active: "True" } }
+        ],
+        output: `[\n  {\n    "iteration": 1,\n    "thought": "Inspecting src/api/auth.py lines 1-15",\n    "action": "read_file",\n    "risk": "READ_ONLY (Autonomous Execution Permitted)"\n  },\n  {\n    "iteration": 2,\n    "thought": "Drafting constant-time HMAC patch with rate limiter",\n    "action": "apply_patch",\n    "risk": "STATE_MUTATING (Intercepted by HITL Gate)"\n  }\n]`
+      },
+
+      6: {
+        file: "src/core/hitl_controller.py",
+        funcName: "HITLController.classify_action_risk()",
+        concept: "Human-Agent Teams: Human-in-the-Loop (HITL) Safety Gate",
+        analogyTitle: "💡 Think of this like: A Security Guard at a Bank Vault Door",
+        studentExplanation: "Looking at a bank account balance is safe (Read-Only). But withdrawing money or changing the vault lock code (State-Mutating) strictly requires the bank manager (Tech Lead Ashraf Khan!) to turn the key and click Approve. The AI is physically blocked until you approve!",
+        takeaway: "Never allow autonomous agents to mutate files, execute database drops, or push git commits without a human approval gate.",
+        lines: [
+          "def classify_action_risk(tool_name: str, arguments: dict):",
+          "    read_only_tools = {'read_file', 'list_dir', 'grep_search', 'run_linter'}",
+          "    mutating_tools = {'apply_patch', 'write_file', 'git_commit', 'run_migration'}",
+          "    if tool_name in read_only_tools:",
+          "        return (ActionRiskCategory.READ_ONLY, False, 'Safe inspection')",
+          "    if tool_name in mutating_tools:",
+          "        target = arguments.get('file_path', 'system files')",
+          "        return (ActionRiskCategory.STATE_MUTATING, True, f'Modifying {target}')",
+          "    return (ActionRiskCategory.STATE_MUTATING, True, 'Conservative policy')"
+        ],
+        substeps: [
+          { lineIdx: 0, vars: { tool_name: '"apply_patch"', arguments: "{ 'file_path': 'src/api/auth.py' }" } },
+          { lineIdx: 1, vars: { read_only_tools: "['read_file', 'list_dir', ...]" } },
+          { lineIdx: 2, vars: { mutating_tools: "['apply_patch', 'write_file', ...]" } },
+          { lineIdx: 3, vars: { is_read_only: "False" } },
+          { lineIdx: 5, vars: { is_mutating: "True" } },
+          { lineIdx: 6, vars: { target: '"src/api/auth.py"' } },
+          { lineIdx: 7, vars: { risk_category: '"STATE_MUTATING"', requires_approval: "True", rationale: '"Modifying src/api/auth.py"' } }
+        ],
+        output: `--- a/src/api/auth.py\n+++ b/src/api/auth.py\n@@ -1,5 +1,9 @@\n+import hmac\n+from src.core.rate_limiter import check_rate_limit\n+\n def authenticate(username, password):\n-    # INSECURE: vulnerable to timing attack and missing rate limit\n-    if password == 'admin_secret':\n+    check_rate_limit(username)\n+    # Constant-time comparison prevents timing attacks\n+    if hmac.compare_digest(password, 'admin_secret'):\n         return {'token': 'jwt_mock_token_123'}\n     return None`
+      },
+
+      7: {
+        file: "src/tools/audit_tools.py",
+        funcName: "AIFluencyAuditor.audit_anti_sycophancy()",
+        concept: "AI Fluency: Pillar 3 (Discernment & Anti-Sycophancy)",
+        analogyTitle: "💡 Think of this like: An Honest Friend Who Won't Let You Make a Bad Mistake",
+        studentExplanation: "A 'yes-man' friend always agrees with you, even if you say 'Hey, should I jump off this roof?'. That is sycophancy! An honest AI engineer trains the model to say: 'No! If you disable rate limiting to make the API faster, attackers will flood the server and take the whole company offline!'",
+        takeaway: "True AI Fluency means never accepting flawed human premises; models must defend truth and safety with empirical proof.",
+        lines: [
+          "def audit_anti_sycophancy(proposal: str) -> dict:",
+          "    prop_lower = proposal.lower()",
+          "    flaws_detected = []",
+          "    if 'remove rate limit' in prop_lower or 'disable auth' in prop_lower:",
+          "        flaws_detected.append('CRITICAL: Disabling rate limiting exposes endpoint to DoS.')",
+          "    is_sycophancy_risk = len(flaws_detected) > 0",
+          "    honest_recommendation = 'Refuse proposal with empirical proof' if is_sycophancy_risk else 'Sound'",
+          "    return {'has_flawed_assumptions': is_sycophancy_risk, 'refutations': flaws_detected}"
+        ],
+        substeps: [
+          { lineIdx: 0, vars: { proposal: '"Can we remove rate limits so the API is faster?"' } },
+          { lineIdx: 1, vars: { prop_lower: '"can we remove rate limits so the api is faster?"' } },
+          { lineIdx: 2, vars: { flaws_detected: "[]" } },
+          { lineIdx: 3, vars: { match: "True ('remove rate limit' detected)" } },
+          { lineIdx: 4, vars: { flaws_detected: "['CRITICAL: Disabling rate limits exposes endpoint to DoS']" } },
+          { lineIdx: 5, vars: { is_sycophancy_risk: "True" } },
+          { lineIdx: 6, vars: { honest_recommendation: '"Refuse proposal with empirical proof"' } },
+          { lineIdx: 7, vars: { outcome: '"FLAWED_PROPOSAL_REJECTED"' } }
+        ],
+        output: `{\n  "has_flawed_assumptions": true,\n  "refutations": [\n    "CRITICAL: Disabling rate limiting exposes endpoint to brute-force attacks and DoS saturation."\n  ],\n  "honest_recommendation": "Refuse proposal with empirical justification",\n  "audit_receipt": {\n    "receipt_id": "claudeops-154692cf",\n    "status": "VERIFIED_APPROVED_AND_MERGED",\n    "total_tokens": 51200,\n    "cost_usd": 0.0465,\n    "hitl_interventions": 1\n  }\n}`
+      }
+    };
+
+    // FINOPS LIVE BURN SPECS PER STEP
+    const FINOPS_STEP_METRICS = {
+      1: {
+        model: "Haiku 3.5 (112ms)",
+        uncached: "1,200 tok ($0.0010)",
+        cached: "0 tok ($0.0000)",
+        savings: "Fast Triage ($0.0010)",
+        cumulativeTokens: 1200,
+        cumulativeCost: 0.0010,
+        savedUsd: 0.0000,
+        velocity: "1.2k tok/step",
+        discountPct: "0%"
+      },
+      2: {
+        model: "Sonnet 3.5 (240ms)",
+        uncached: "3,800 tok ($0.0114)",
+        cached: "0 tok ($0.0000)",
+        savings: "Structured XML ($0.0124)",
+        cumulativeTokens: 5000,
+        cumulativeCost: 0.0124,
+        savedUsd: 0.0000,
+        velocity: "2.5k tok/step",
+        discountPct: "0%"
+      },
+      3: {
+        model: "Haiku 3.5 Parallel (180ms)",
+        uncached: "4,400 tok ($0.0044)",
+        cached: "12,000 tok ($0.0012)",
+        savings: "66.7% ($0.0360 Saved)",
+        cumulativeTokens: 21400,
+        cumulativeCost: 0.0180,
+        savedUsd: 0.0360,
+        velocity: "7.1k tok/step",
+        discountPct: "66.7%"
+      },
+      4: {
+        model: "Sonnet 3.5 (Prompt Cache)",
+        uncached: "5,600 tok ($0.0168)",
+        cached: "28,000 tok ($0.0084)",
+        savings: "72.8% ($0.1218 Saved)",
+        cumulativeTokens: 55000,
+        cumulativeCost: 0.0432,
+        savedUsd: 0.1218,
+        velocity: "13.7k tok/step",
+        discountPct: "72.8%"
+      },
+      5: {
+        model: "Sonnet 3.5 Autonomous",
+        uncached: "4,200 tok ($0.0126)",
+        cached: "18,000 tok ($0.0054)",
+        savings: "73.6% ($0.1704 Saved)",
+        cumulativeTokens: 77200,
+        cumulativeCost: 0.0612,
+        savedUsd: 0.1704,
+        velocity: "15.4k tok/step",
+        discountPct: "73.6%"
+      },
+      6: {
+        model: "HITL FinOps Gate (Halted)",
+        uncached: "0 tok (Halted)",
+        cached: "In-Memory Session",
+        savings: "Gate Armed ($0.1704 Saved)",
+        cumulativeTokens: 77200,
+        cumulativeCost: 0.0612,
+        savedUsd: 0.1704,
+        velocity: "12.8k tok/step",
+        discountPct: "73.6%"
+      },
+      7: {
+        model: "Sonnet 3.5 + Haiku Critic",
+        uncached: "6,800 tok ($0.0204)",
+        cached: "14,000 tok ($0.0042)",
+        savings: "72.2% ($0.2124 Saved)",
+        cumulativeTokens: 84000,
+        cumulativeCost: 0.0816,
+        savedUsd: 0.2124,
+        velocity: "12.0k tok/step",
+        discountPct: "72.2%"
+      }
+    };
+
+    // RUNTIME STATE
+    let currentStep = 1;
+    let currentSubstepIdx = 0;
+    let autoPlayTimer = null;
+    let hitlApproved = false;
+    let selectedTokenAllowance = 15000;
+    let selectedTokenCost = 0.045;
+    let grantedExtraTokens = 0;
+    let grantedExtraCost = 0;
+    const BASE_BUDGET_CAP = 100000;
+    let hitlOriginalHtml = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const hitlBox = document.getElementById('hitlDecisionBox');
+      if (hitlBox) {
+        hitlOriginalHtml = hitlBox.innerHTML;
+      }
+      renderPipelineStep(1, 0);
+    });
+
+    function updateSelectedTokenAllowance(tokens, cost, element) {
+      selectedTokenAllowance = tokens;
+      selectedTokenCost = cost;
+      document.querySelectorAll('.token-option-card').forEach(c => c.classList.remove('selected'));
+      if (element) {
+        const card = element.closest('.token-option-card');
+        if (card) card.classList.add('selected');
+      }
+      const label = document.getElementById('selectedAllowanceLabel');
+      if (label) label.textContent = `+${tokens.toLocaleString()} tok ($${cost.toFixed(4)})`;
+      const capLabel = document.getElementById('newCapLabel');
+      if (capLabel) capLabel.textContent = `${(BASE_BUDGET_CAP + tokens).toLocaleString()} Tokens`;
+    }
+
+    function renderPipelineStep(stepIndex, substepIdx = 0) {
+      currentStep = stepIndex;
+      currentSubstepIdx = substepIdx;
+      const stepData = PIPELINE_STEPS[stepIndex];
+
+      // Update Step Counter & Badge
+      document.getElementById('stepCounter').textContent = `Step ${stepIndex}/7`;
+      document.getElementById('debugStepFraction').textContent = `${stepIndex}/7`;
+
+      // Update Left Pipeline Cards
+      for (let i = 1; i <= 7; i++) {
+        const card = document.getElementById(`card-step-${i}`);
+        const icon = document.getElementById(`icon-step-${i}`);
+        card.classList.remove('active');
+        if (i < stepIndex) {
+          card.classList.add('completed');
+          icon.textContent = '✅';
+        } else if (i === stepIndex) {
+          card.classList.add('active');
+          icon.textContent = (i === 6 && !hitlApproved) ? '🛑' : '⏳';
+        } else {
+          card.classList.remove('completed');
+          icon.textContent = '⚪';
+        }
+      }
+
+      // Update 🎓 Student Explanation Card
+      document.getElementById('studentConceptBadge').textContent = stepData.concept;
+      document.getElementById('studentAnalogyTitle').textContent = stepData.analogyTitle;
+      document.getElementById('studentExplanationText').textContent = stepData.studentExplanation;
+      document.getElementById('studentTakeaway').innerHTML = `📌 <strong>Key Learning:</strong> ${stepData.takeaway}`;
+
+      // Update 💰 FinOps & Token Cost Dashboard Bar
+      const finopsData = FINOPS_STEP_METRICS[stepIndex];
+      document.getElementById('statModelTier').textContent = finopsData.model;
+      document.getElementById('statUncachedTokens').textContent = finopsData.uncached;
+      document.getElementById('statCachedTokens').textContent = finopsData.cached;
+      document.getElementById('statSavingsPct').textContent = finopsData.savings;
+
+      // Update ⚡ Live Budget Meter & Token Odometer
+      const totalCap = BASE_BUDGET_CAP + grantedExtraTokens;
+      const burnedTok = finopsData.cumulativeTokens;
+      const burnedCost = finopsData.cumulativeCost.toFixed(4);
+      const remainingTok = Math.max(0, totalCap - burnedTok);
+      const burnPct = Math.min(100, Math.max(1, (burnedTok / totalCap) * 100)).toFixed(1);
+
+      document.getElementById('burnPercentageText').textContent = `${burnPct}% Budget Burned`;
+      document.getElementById('budgetCapText').textContent = `Cap: ${totalCap.toLocaleString()} tok`;
+      const fillEl = document.getElementById('budgetProgressFill');
+      fillEl.style.width = `${burnPct}%`;
+      if (parseFloat(burnPct) > 80) {
+        fillEl.classList.add('warning');
+      } else {
+        fillEl.classList.remove('warning');
+      }
+
+      document.getElementById('burnTokensCumulative').textContent = `${burnedTok.toLocaleString()} tok`;
+      document.getElementById('burnTokensCost').textContent = `($${burnedCost})`;
+      document.getElementById('burnTokensRemaining').textContent = `${remainingTok.toLocaleString()} tok`;
+      document.getElementById('burnTokensSaved').textContent = `+$${finopsData.savedUsd.toFixed(4)}`;
+      document.getElementById('burnSavingsPctText').textContent = `(${finopsData.discountPct} saved)`;
+      document.getElementById('budgetVelocityBadge').textContent = `Rate: ~${finopsData.velocity}`;
+
+      const extraLabel = document.getElementById('burnExtraGranted');
+      const extraStatus = document.getElementById('burnExtraStatus');
+      if (grantedExtraTokens > 0) {
+        extraLabel.textContent = `+${grantedExtraTokens.toLocaleString()} tok`;
+        extraStatus.textContent = 'Approved by Ashraf';
+      } else {
+        extraLabel.textContent = '+0 tok';
+        extraStatus.textContent = (stepIndex >= 6 ? 'Pending Gate' : 'Awaiting HITL');
+      }
+
+      // Update Debugger Top Header
+      document.getElementById('liveFileLabel').textContent = stepData.file;
+      document.getElementById('liveFunctionBadge').textContent = stepData.funcName;
+
+      // Render Code Lines
+      const linesContainer = document.getElementById('liveCodeLinesContainer');
+      let html = '';
+      stepData.lines.forEach((lineText, idx) => {
+        html += `
+          <div class="code-line-row" id="code-line-${idx}">
+            <div class="code-line-gutter">
+              <span class="line-arrow" id="arrow-${idx}">▶</span>
+              <span>${idx + 1}</span>
+            </div>
+            <div class="code-line-text">${escapeHtml(lineText)}</div>
+          </div>
+        `;
+      });
+      linesContainer.innerHTML = html;
+
+      // Render Substep (Line Highlight + Variables)
+      applySubstep(substepIdx);
+
+      // Render Output
+      if (stepIndex === 6) {
+        document.getElementById('outputWidgetTitle').textContent = '📝 Unified Git Diff (auth.py)';
+        document.getElementById('stepOutputPreview').textContent = stepData.output;
+      } else if (stepIndex === 7) {
+        document.getElementById('outputWidgetTitle').textContent = '📜 Immutable Cryptographic Audit Receipt';
+        const finalTok = 84000;
+        const finalCost = 0.0816;
+        const receiptJson = {
+          "receipt_id": "claudeops-154692cf",
+          "status": "VERIFIED_APPROVED_AND_MERGED",
+          "hitl_gatekeeper": "Ashraf Khan (Staff Tech Lead)",
+          "finops_authorization": {
+            "pre_gate_burn": "77,200 tokens ($0.0612 USD)",
+            "authorized_extra_allowance": grantedExtraTokens > 0 
+              ? `+${grantedExtraTokens.toLocaleString()} tokens ($${grantedExtraCost.toFixed(3)} USD)`
+              : "+15,000 tokens ($0.045 USD) [Standard]",
+            "total_budget_cap": totalCap,
+            "final_tokens_burned": finalTok,
+            "final_cost_usd": finalCost,
+            "prompt_cache_discount_usd": 0.2124,
+            "net_savings_percentage": 72.24
+          },
+          "anti_sycophancy_audit": {
+            "has_flawed_assumptions": true,
+            "refutation": "Disabling rate limit rejected with empirical proof; constant-time HMAC deployed."
+          },
+          "cryptographic_hash": "sha256:7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069"
+        };
+        document.getElementById('stepOutputPreview').textContent = JSON.stringify(receiptJson, null, 2);
+      } else {
+        document.getElementById('outputWidgetTitle').textContent = '📥 Step Output Deliverable';
+        document.getElementById('stepOutputPreview').textContent = stepData.output;
+      }
+
+      // HITL Banner logic
+      const hitlBox = document.getElementById('hitlDecisionBox');
+      if (stepIndex === 6 && !hitlApproved) {
+        hitlBox.style.display = 'flex';
+        document.getElementById('pipelineStatusBadge').className = 'badge badge-amber';
+        document.getElementById('pipelineStatusBadge').textContent = 'Awaiting Human Approval';
+        if (autoPlayTimer) {
+          clearInterval(autoPlayTimer);
+          autoPlayTimer = null;
+          document.getElementById('btnRunPipeline').textContent = '▶ Run Pipeline (Auto-Step)';
+        }
+      } else {
+        hitlBox.style.display = 'none';
+        if (stepIndex === 7) {
+          document.getElementById('pipelineStatusBadge').className = 'badge badge-green';
+          document.getElementById('pipelineStatusBadge').textContent = 'Completed & Verified';
+        } else {
+          document.getElementById('pipelineStatusBadge').className = 'badge badge-cyan';
+          document.getElementById('pipelineStatusBadge').textContent = `Step ${stepIndex} Active`;
+        }
+      }
+    }
+
+    function applySubstep(substepIdx) {
+      const stepData = PIPELINE_STEPS[currentStep];
+      if (substepIdx < 0 || substepIdx >= stepData.substeps.length) return;
+
+      currentSubstepIdx = substepIdx;
+      const sub = stepData.substeps[substepIdx];
+
+      // Update Line Number Display
+      document.getElementById('debugLineNumDisplay').textContent = sub.lineIdx + 1;
+
+      // Highlight Code Line
+      document.querySelectorAll('.code-line-row').forEach(r => r.classList.remove('active-debug-line'));
+      const activeRow = document.getElementById(`code-line-${sub.lineIdx}`);
+      if (activeRow) {
+        activeRow.classList.add('active-debug-line');
+        activeRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      // Update Variables Watch Table
+      const tbody = document.getElementById('debugVariablesTbody');
+      let varHtml = '';
+      for (const [vName, vVal] of Object.entries(sub.vars)) {
+        const valClass = (vVal === 'True' || vVal === 'False') ? 'var-val-bool' : 'var-val';
+        varHtml += `
+          <tr>
+            <td class="var-name">${vName}</td>
+            <td class="${valClass}">${escapeHtml(String(vVal))}</td>
+          </tr>
+        `;
+      }
+      tbody.innerHTML = varHtml;
+    }
+
+    // STEP A SINGLE LINE (F10)
+    function stepSingleLine() {
+      const stepData = PIPELINE_STEPS[currentStep];
+      if (currentSubstepIdx < stepData.substeps.length - 1) {
+        applySubstep(currentSubstepIdx + 1);
+      } else {
+        // Advance to next pipeline step
+        if (currentStep === 6 && !hitlApproved) {
+          alert("🛑 Pre-Action Gate is blocking! Click 'Authorize Token Allowance & Commit Patch' in the amber card first.");
+          return;
+        }
+        if (currentStep < 7) {
+          renderPipelineStep(currentStep + 1, 0);
+        } else {
+          alert("🎉 All 7 steps and lines executed with 100% success!");
+        }
+      }
+    }
+
+    // AUTO RUN PIPELINE (Steps through line-by-line automatically)
+    function toggleRunPipeline() {
+      const btn = document.getElementById('btnRunPipeline');
+      if (autoPlayTimer) {
+        clearInterval(autoPlayTimer);
+        autoPlayTimer = null;
+        btn.textContent = '▶ Run Pipeline (Auto-Step)';
+      } else {
+        btn.textContent = '⏸ Pause Execution';
+        autoPlayTimer = setInterval(() => {
+          const stepData = PIPELINE_STEPS[currentStep];
+          if (currentSubstepIdx < stepData.substeps.length - 1) {
+            applySubstep(currentSubstepIdx + 1);
+          } else {
+            if (currentStep === 6 && !hitlApproved) {
+              clearInterval(autoPlayTimer);
+              autoPlayTimer = null;
+              btn.textContent = '▶ Run Pipeline (Auto-Step)';
+              return;
+            }
+            if (currentStep < 7) {
+              renderPipelineStep(currentStep + 1, 0);
+            } else {
+              clearInterval(autoPlayTimer);
+              autoPlayTimer = null;
+              btn.textContent = '▶ Run Pipeline (Auto-Step)';
+            }
+          }
+        }, 750);
+      }
+    }
+
+    function nextPipelineStep() {
+      if (currentStep === 6 && !hitlApproved) {
+        alert("🛑 Pre-Action Gate is blocking! Click 'Authorize Token Allowance & Commit Patch' in the amber card first.");
+        return;
+      }
+      if (currentStep < 7) {
+        renderPipelineStep(currentStep + 1, 0);
+      }
+    }
+
+    function selectStep(stepIndex) {
+      if (autoPlayTimer) {
+        clearInterval(autoPlayTimer);
+        autoPlayTimer = null;
+        document.getElementById('btnRunPipeline').textContent = '▶ Run Pipeline (Auto-Step)';
+      }
+      renderPipelineStep(stepIndex, 0);
+    }
+
+    function approveHITLAction() {
+      hitlApproved = true;
+      grantedExtraTokens = selectedTokenAllowance;
+      grantedExtraCost = selectedTokenCost;
+      const totalCap = BASE_BUDGET_CAP + grantedExtraTokens;
+
+      // Update Live Budget Odometer immediately
+      document.getElementById('burnExtraGranted').textContent = `+${grantedExtraTokens.toLocaleString()} tok`;
+      document.getElementById('burnExtraStatus').textContent = 'Approved by Ashraf';
+      document.getElementById('budgetCapText').textContent = `Cap: ${totalCap.toLocaleString()} tok`;
+      const remainingTok = Math.max(0, totalCap - 77200);
+      document.getElementById('burnTokensRemaining').textContent = `${remainingTok.toLocaleString()} tok`;
+      const burnPct = Math.min(100, (77200 / totalCap) * 100).toFixed(1);
+      document.getElementById('burnPercentageText').textContent = `${burnPct}% Budget Burned`;
+      document.getElementById('budgetProgressFill').style.width = `${burnPct}%`;
+
+      document.getElementById('hitlDecisionBox').innerHTML = `
+        <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="color: #6ee7b7; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: space-between;">
+            <span>✓ TECH LEAD APPROVAL & FINOPS ALLOCATION GRANTED!</span>
+            <span class="badge badge-green">Signed: Ashraf Khan</span>
+          </div>
+          <div style="font-size: 12.5px; color: #e2e8f0; line-height: 1.45;">
+            State-mutating patch approved for production commit. FinOps authorization granted: <strong style="color: #38bdf8;">+${grantedExtraTokens.toLocaleString()} Extra Tokens ($${grantedExtraCost.toFixed(3)} USD)</strong> added to active budget cap.
+          </div>
+          <div style="font-size: 11px; color: #a5b4fc; font-family: 'JetBrains Mono', monospace;">
+            Total Authorized Cap: ${totalCap.toLocaleString()} Tokens • Advancing to Step 7 Verification...
+          </div>
+        </div>
+      `;
+
+      setTimeout(() => {
+        renderPipelineStep(7, 0);
+      }, 850);
+    }
+
+    function rejectHITLAction() {
+      alert("❌ Patch Rejected! Agent rolls back to scratchpad to synthesize alternative approach.");
+      renderPipelineStep(3, 0);
+    }
+
+    function resetPipeline() {
+      if (autoPlayTimer) {
+        clearInterval(autoPlayTimer);
+        autoPlayTimer = null;
+        document.getElementById('btnRunPipeline').textContent = '▶ Run Pipeline (Auto-Step)';
+      }
+      hitlApproved = false;
+      grantedExtraTokens = 0;
+      grantedExtraCost = 0;
+      selectedTokenAllowance = 15000;
+      selectedTokenCost = 0.045;
+      const hitlBox = document.getElementById('hitlDecisionBox');
+      if (hitlBox && hitlOriginalHtml) {
+        hitlBox.innerHTML = hitlOriginalHtml;
+      }
+      renderPipelineStep(1, 0);
+    }
+
+    function switchScenario(scenarioKey) {
+      resetPipeline();
+    }
+
+    function toggleEditorHeight() {
+      const editor = document.querySelector('.debugger-editor');
+      if (!editor) return;
+      editor.classList.toggle('expanded');
+      const isExp = editor.classList.contains('expanded');
+      const textEl = document.getElementById('editorHeightText');
+      const iconEl = document.getElementById('editorHeightIcon');
+      if (textEl) textEl.textContent = isExp ? 'Compact View' : 'Taller View';
+      if (iconEl) iconEl.textContent = isExp ? '⤡' : '⤢';
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+  </script>
+</body>
+</html>
